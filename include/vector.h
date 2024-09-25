@@ -8,6 +8,7 @@ typedef struct {
     double* buffer;
 } Vector;
 
+Vector* new_uninitialized_vector(size_t size);
 Vector* new_zero_vector(size_t size);
 Vector* new_random_vector(size_t size);
 void free_vector(Vector* vector);

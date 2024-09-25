@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+Vector* new_uninitialized_vector(size_t size) {
+    Vector* new_vector = malloc(sizeof(Vector));
+    new_vector->size = size;
+    new_vector->buffer = malloc(size * sizeof(double));
+
+    return new_vector;
+}
+
 Vector* new_zero_vector(size_t size) {
     Vector* new_vector = malloc(sizeof(Vector));
     new_vector->size = size;
