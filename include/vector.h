@@ -1,7 +1,7 @@
 #ifndef NCN_VECTOR_H
 #define NCN_VECTOR_H
 
-#include "common_defs.h"
+#include <common_defs.h>
 
 typedef struct {
     size_t size;

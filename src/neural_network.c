@@ -1,5 +1,5 @@
-#include "../include/neural_network.h"
-#include "../include/utils.h"
+#include <neural_network.h>
+#include <utils.h>
 
 #include <stdlib.h>
 #include <stdio.h>

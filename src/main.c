@@ -1,6 +1,6 @@
-#include "../include/matrix.h"
-#include "../include/vector.h"
-#include "../include/neural_network.h"
+#include <matrix.h>
+#include <vector.h>
+#include <neural_network.h>
 
 #include <stdio.h>
 

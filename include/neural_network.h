@@ -1,9 +1,9 @@
 #ifndef NCN_NEURAL_NETWORK_H
 #define NCN_NEURAL_NETWORK_H
 
-#include "common_defs.h"
-#include "vector.h"
-#include "matrix.h"
+#include <common_defs.h>
+#include <vector.h>
+#include <matrix.h>
 
 typedef struct {
     Vector* input_layer;
