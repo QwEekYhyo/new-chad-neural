@@ -46,8 +46,9 @@ void forward_pass(NeuralNetwork* nn, Vector* inputs) {
 
     // Input to hidden layer
     for (size_t i = 0; i < nn->hidden_layer->size; i++) {
+        nn->hidden_layer->buffer[i] = 0;
         for (size_t j = 0; j < nn->input_layer->size; j++) {
-            nn->hidden_layer->buffer[i] = inputs->buffer[j] * nn->input_hidden_weights->buffer[i][j];
+            nn->hidden_layer->buffer[i] += inputs->buffer[j] * nn->input_hidden_weights->buffer[i][j];
         }
         nn->hidden_layer->buffer[i] += nn->hidden_biases->buffer[i];
         nn->hidden_layer->buffer[i] = sigmoid(nn->hidden_layer->buffer[i]);
@@ -55,8 +56,9 @@ void forward_pass(NeuralNetwork* nn, Vector* inputs) {
 
     // Hidden to output layer
     for (size_t i = 0; i < nn->output_layer->size; i++) {
+        nn->output_layer->buffer[i] = 0;
         for (size_t j = 0; j < nn->hidden_layer->size; j++) {
-            nn->output_layer->buffer[i] = nn->hidden_layer->buffer[j] * nn->hidden_output_weights->buffer[i][j];
+            nn->output_layer->buffer[i] += nn->hidden_layer->buffer[j] * nn->hidden_output_weights->buffer[i][j];
         }
         nn->output_layer->buffer[i] += nn->output_biases->buffer[i];
         nn->output_layer->buffer[i] = sigmoid(nn->output_layer->buffer[i]);
