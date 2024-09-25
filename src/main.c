@@ -23,6 +23,15 @@ int main(void) {
     NeuralNetwork* nn = new_neural_network(3, 2, 3);
     print_matrix(nn->input_hidden_weights);
 
+    v = new_uninitialized_vector(3);
+    v->buffer[0] = 0.5;
+    v->buffer[1] = 0.0;
+    v->buffer[2] = 1.0;
+    forward_pass(nn, v);
+
+    printf("Outputs after forward pass:\n");
+    print_vector(nn->output_layer);
+    free_vector(v);
     free_neural_network(nn);
     return 0;
 }
