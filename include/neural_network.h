@@ -5,6 +5,8 @@
 #include <vector.h>
 #include <matrix.h>
 
+static const double LEARNING_RATE = 0.01;
+
 typedef struct {
     Vector* input_layer;
     Vector* hidden_layer;
@@ -15,11 +17,17 @@ typedef struct {
 
     Vector* hidden_biases;
     Vector* output_biases;
+
+    activation_function activation_function;
+    activation_function activation_function_derivative;
 } NeuralNetwork;
 
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);
 void free_neural_network(NeuralNetwork* nn);
 
+void set_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
+
 void forward_pass(NeuralNetwork* nn, Vector* inputs);
+void back_propagation(NeuralNetwork* nn, Vector* expected_outputs);
 
 #endif // NCN_NEURAL_NETWORK_H
