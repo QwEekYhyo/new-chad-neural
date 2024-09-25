@@ -1,8 +1,8 @@
 #include "../include/matrix.h"
+#include "../include/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 Matrix* new_zero_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = malloc(sizeof(Matrix));
@@ -18,7 +18,19 @@ Matrix* new_zero_matrix(size_t rows, size_t columns) {
 }
 
 Matrix* new_random_matrix(size_t rows, size_t columns) {
-    return NULL;
+    Matrix* new_matrix = malloc(sizeof(Matrix));
+    new_matrix->rows = rows;
+    new_matrix->columns = columns;
+    new_matrix->buffer = malloc(rows * sizeof(double*));
+
+    for (size_t i = 0; i < rows; i++) {
+        new_matrix->buffer[i] = malloc(columns * sizeof(double));
+        for (size_t j = 0; j < columns; j++) {
+            new_matrix->buffer[i][j] = rand_double_range(0, 1);
+        }
+    }
+
+    return new_matrix;
 }
 
 void free_matrix(Matrix* matrix) {

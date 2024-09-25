@@ -1,8 +1,8 @@
 #include "../include/vector.h"
+#include "../include/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 Vector* new_zero_vector(size_t size) {
     Vector* new_vector = malloc(sizeof(Vector));
@@ -13,7 +13,15 @@ Vector* new_zero_vector(size_t size) {
 }
 
 Vector* new_random_vector(size_t size) {
-    return NULL;
+    Vector* new_vector = malloc(sizeof(Vector));
+    new_vector->size = size;
+
+    new_vector->buffer = malloc(size * sizeof(double));
+    for (size_t i = 0; i < size; i++) {
+        new_vector->buffer[i] = rand_double_range(0, 1);
+    }
+
+    return new_vector;
 }
 
 void free_vector(Vector* vector) {
