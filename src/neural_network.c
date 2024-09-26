@@ -82,8 +82,9 @@ void back_propagation(NeuralNetwork* nn, Vector* targets) {
     }
 
     // Calculate hidden layer error
-    Vector* hidden_errors = new_zero_vector(nn->hidden_layer->size);
+    Vector* hidden_errors = new_uninitialized_vector(nn->hidden_layer->size);
     for (size_t i = 0; i < nn->hidden_layer->size; i++) {
+        hidden_errors->buffer[i] = 0;
         for (size_t j = 0; j < nn->output_layer->size; j++) {
             hidden_errors->buffer[i] += output_errors->buffer[j] * nn->hidden_output_weights->buffer[j][i];
         }
