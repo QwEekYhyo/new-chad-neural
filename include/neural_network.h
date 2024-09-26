@@ -8,7 +8,7 @@
 static const double LEARNING_RATE = 0.01;
 
 typedef struct {
-    Vector* input_layer;
+    size_t input_size;
     Vector* hidden_layer;
     Vector* output_layer;
 
@@ -28,6 +28,6 @@ void free_neural_network(NeuralNetwork* nn);
 void set_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
 
 void forward_pass(NeuralNetwork* nn, Vector* inputs);
-void back_propagation(NeuralNetwork* nn, Vector* expected_outputs);
+void back_propagation(NeuralNetwork* nn, Vector* inputs, Vector* expected_outputs);
 
 #endif // NCN_NEURAL_NETWORK_H

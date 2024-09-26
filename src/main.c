@@ -56,7 +56,7 @@ int main(void) {
         input->buffer[0] = x;
         expected_output->buffer[0] = y;
         forward_pass(nn, input);
-        back_propagation(nn, expected_output);
+        back_propagation(nn, input, expected_output);
     }
 
     double prediction;

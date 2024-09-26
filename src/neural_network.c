@@ -7,7 +7,7 @@
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs) {
     NeuralNetwork* new_nn = malloc(sizeof(NeuralNetwork));
 
-    new_nn->input_layer = new_uninitialized_vector(num_inputs);
+    new_nn->input_size = num_inputs;
     new_nn->hidden_layer = new_uninitialized_vector(num_hidden);
     new_nn->output_layer = new_uninitialized_vector(num_outputs);
 
@@ -23,7 +23,6 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
 }
 
 void free_neural_network(NeuralNetwork* nn) {
-    free_vector(nn->input_layer);
     free_vector(nn->hidden_layer);
     free_vector(nn->output_layer);
 
@@ -42,11 +41,11 @@ void set_activation_functions(NeuralNetwork* nn, activation_function af, activat
 }
 
 void forward_pass(NeuralNetwork* nn, Vector* inputs) {
-    if (inputs->size != nn->input_layer->size) {
+    if (inputs->size != nn->input_size) {
         printf(
                 "Number of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)",
                 inputs->size,
-                nn->input_layer->size
+                nn->input_size
         );
         return;
     }
@@ -54,7 +53,7 @@ void forward_pass(NeuralNetwork* nn, Vector* inputs) {
     // Input to hidden layer
     for (size_t i = 0; i < nn->hidden_layer->size; i++) {
         nn->hidden_layer->buffer[i] = 0;
-        for (size_t j = 0; j < nn->input_layer->size; j++) {
+        for (size_t j = 0; j < nn->input_size; j++) {
             nn->hidden_layer->buffer[i] += inputs->buffer[j] * nn->input_hidden_weights->buffer[i][j];
         }
         nn->hidden_layer->buffer[i] += nn->hidden_biases->buffer[i];
@@ -73,7 +72,7 @@ void forward_pass(NeuralNetwork* nn, Vector* inputs) {
 }
 
 // forward_pass needs to be called before this function
-void back_propagation(NeuralNetwork* nn, Vector* targets) {
+void back_propagation(NeuralNetwork* nn, Vector* inputs, Vector* targets) {
     // Calculate output error
     Vector* output_errors = new_uninitialized_vector(nn->output_layer->size);
     for (size_t i = 0; i < nn->output_layer->size; i++) {
@@ -101,8 +100,8 @@ void back_propagation(NeuralNetwork* nn, Vector* targets) {
 
     // Update input to hidden weights and hidden biases
     for (size_t i = 0; i < nn->hidden_layer->size; i++) {
-        for (size_t j = 0; j < nn->input_layer->size; j++) {
-            nn->input_hidden_weights->buffer[i][j] += LEARNING_RATE * hidden_errors->buffer[i] * nn->input_layer->buffer[j];
+        for (size_t j = 0; j < nn->input_size; j++) {
+            nn->input_hidden_weights->buffer[i][j] += LEARNING_RATE * hidden_errors->buffer[i] * inputs->buffer[j];
         }
         nn->hidden_biases->buffer[i] += LEARNING_RATE * hidden_errors->buffer[i];
     }
