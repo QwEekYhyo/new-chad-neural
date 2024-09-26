@@ -8,8 +8,9 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
     NeuralNetwork* new_nn = malloc(sizeof(NeuralNetwork));
 
     new_nn->input_size = num_inputs;
-    new_nn->hidden_layer = new_uninitialized_vector(num_hidden);
-    new_nn->output_layer = new_uninitialized_vector(num_outputs);
+    size_t default_batch_size = 1;
+    new_nn->hidden_layer = new_uninitialized_matrix(num_hidden, default_batch_size);
+    new_nn->output_layer = new_uninitialized_matrix(num_outputs, default_batch_size);
 
     new_nn->input_hidden_weights = new_random_matrix(num_hidden, num_inputs);
     new_nn->hidden_output_weights = new_random_matrix(num_outputs, num_hidden);
@@ -23,8 +24,8 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
 }
 
 void free_neural_network(NeuralNetwork* nn) {
-    free_vector(nn->hidden_layer);
-    free_vector(nn->output_layer);
+    free_matrix(nn->hidden_layer);
+    free_matrix(nn->output_layer);
 
     free_matrix(nn->input_hidden_weights);
     free_matrix(nn->hidden_output_weights);
@@ -40,37 +41,49 @@ void set_activation_functions(NeuralNetwork* nn, activation_function af, activat
     nn->activation_function_derivative = daf;
 }
 
-void forward_pass(NeuralNetwork* nn, Vector* inputs) {
-    if (inputs->size != nn->input_size) {
+void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
+    size_t num_hidden = nn->hidden_layer->rows;
+    size_t num_outputs = nn->output_layer->rows;
+    free_matrix(nn->hidden_layer);
+    free_matrix(nn->output_layer);
+    nn->hidden_layer = new_uninitialized_matrix(num_hidden, batch_size);
+    nn->output_layer = new_uninitialized_matrix(num_outputs, batch_size);
+}
+
+void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
+    if (inputs->rows != nn->input_size) {
         printf(
-                "Number of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)",
-                inputs->size,
+                "Size of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)",
+                inputs->rows,
                 nn->input_size
         );
         return;
     }
 
     // Input to hidden layer
-    for (size_t i = 0; i < nn->hidden_layer->size; i++) {
-        nn->hidden_layer->buffer[i] = 0;
-        for (size_t j = 0; j < nn->input_size; j++) {
-            nn->hidden_layer->buffer[i] += inputs->buffer[j] * nn->input_hidden_weights->buffer[i][j];
+    for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
+        for (size_t i = 0; i < nn->hidden_layer->rows; i++) {
+            nn->hidden_layer->buffer[i][b] = nn->hidden_biases->buffer[i];
+            for (size_t j = 0; j < nn->input_size; j++) {
+                nn->hidden_layer->buffer[i][b] += inputs->buffer[j][b] * nn->input_hidden_weights->buffer[i][j];
+            }
+            nn->hidden_layer->buffer[i][b] = nn->activation_function(nn->hidden_layer->buffer[i][b]);
         }
-        nn->hidden_layer->buffer[i] += nn->hidden_biases->buffer[i];
-        nn->hidden_layer->buffer[i] = nn->activation_function(nn->hidden_layer->buffer[i]);
     }
 
     // Hidden to output layer
-    for (size_t i = 0; i < nn->output_layer->size; i++) {
-        nn->output_layer->buffer[i] = 0;
-        for (size_t j = 0; j < nn->hidden_layer->size; j++) {
-            nn->output_layer->buffer[i] += nn->hidden_layer->buffer[j] * nn->hidden_output_weights->buffer[i][j];
+    for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
+        for (size_t i = 0; i < nn->output_layer->rows; i++) {
+            nn->output_layer->buffer[i][b] = nn->output_biases->buffer[i];
+            for (size_t j = 0; j < nn->hidden_layer->rows; j++) {
+                nn->output_layer->buffer[i][b] += nn->hidden_layer->buffer[j][b] * nn->hidden_output_weights->buffer[i][j];
+            }
+            nn->output_layer->buffer[i][b] = nn->activation_function(nn->output_layer->buffer[i][b]);
         }
-        nn->output_layer->buffer[i] += nn->output_biases->buffer[i];
-        nn->output_layer->buffer[i] = nn->activation_function(nn->output_layer->buffer[i]);
     }
 }
 
+/*
 // forward_pass needs to be called before this function
 void back_propagation(NeuralNetwork* nn, Vector* inputs, Vector* targets) {
     // Calculate output error
@@ -109,3 +122,4 @@ void back_propagation(NeuralNetwork* nn, Vector* inputs, Vector* targets) {
     free_vector(output_errors);
     free_vector(hidden_errors);
 }
+*/

@@ -26,6 +26,46 @@ double f(double x) {
     return 0.4 * x + 0.2;
 }
 
+// This is a test main
+int main(void) {
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    srandom(tm.tv_sec + tm.tv_usec * 1000000ul);
+
+    NeuralNetwork* nn = new_neural_network(2, 3, 1);
+    Matrix* m1 = new_uninitialized_matrix(2, 1);
+    m1->buffer[0][0] = 1.0;
+    m1->buffer[1][0] = 0.5;
+    Matrix* m2 = new_uninitialized_matrix(2, 1);
+    m2->buffer[0][0] = 0.18;
+    m2->buffer[1][0] = 0.34;
+
+    forward_pass(nn, m1);
+    printf("single m1:\n");
+    print_matrix(nn->output_layer);
+
+    forward_pass(nn, m2);
+    printf("single m2:\n");
+    print_matrix(nn->output_layer);
+
+    free(m2);
+    m1 = new_uninitialized_matrix(2, 2);
+    m1->buffer[0][0] = 1.0;
+    m1->buffer[1][0] = 0.5;
+    m1->buffer[0][1] = 0.18;
+    m1->buffer[1][1] = 0.34;
+    set_batch_size(nn, 2);
+
+    forward_pass(nn, m1);
+    printf("double m:\n");
+    print_matrix(nn->output_layer);
+
+    free_matrix(m1);
+    free_neural_network(nn);
+    return 0;
+}
+
+/*
 int main(void) {
     struct timeval tm;
     gettimeofday(&tm, NULL);
@@ -36,7 +76,6 @@ int main(void) {
 
     Vector* input = new_uninitialized_vector(1);
     Vector* expected_output = new_uninitialized_vector(1);
-    /* double test_value = rand_double_range(0, 1); */
 
     int Xs[epochs];
     for (size_t i = 0; i < epochs; i++) {
@@ -86,3 +125,4 @@ int main(void) {
     free_neural_network(nn);
     return 0;
 }
+*/

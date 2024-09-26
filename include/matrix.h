@@ -9,6 +9,7 @@ typedef struct {
     double** buffer;
 } Matrix;
 
+Matrix* new_uninitialized_matrix(size_t rows, size_t columns);
 Matrix* new_zero_matrix(size_t rows, size_t columns);
 Matrix* new_random_matrix(size_t rows, size_t columns);
 void free_matrix(Matrix* matrix);

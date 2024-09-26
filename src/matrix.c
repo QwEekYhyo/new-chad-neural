@@ -4,6 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+Matrix* new_uninitialized_matrix(size_t rows, size_t columns) {
+    Matrix* new_matrix = malloc(sizeof(Matrix));
+    new_matrix->rows = rows;
+    new_matrix->columns = columns;
+    new_matrix->buffer = malloc(rows * sizeof(double*));
+
+    for (size_t i = 0; i < rows; i++) {
+        new_matrix->buffer[i] = malloc(columns * sizeof(double));
+    }
+
+    return new_matrix;
+}
+
 Matrix* new_zero_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = malloc(sizeof(Matrix));
     new_matrix->rows = rows;
