@@ -26,40 +26,44 @@ void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, si
     Matrix* input;
     Matrix* output;
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
-        // First train separately the small portion of the dataset left out by the iteration division
-        set_batch_size(trainer->nn, not_trained);
-        input  = new_uninitialized_matrix(input_size , not_trained);
-        output = new_uninitialized_matrix(output_size , not_trained);
+        if (epoch % 100 == 0)
+            printf("training epoch = %lu\n", epoch);
 
-        // Fill input & output matrices
-        // I feel like filling both matrices at the same time using if statements to check boundaries
-        // is more efficient than looping twice ?
-        for (size_t data_index = 0; data_index < not_trained; data_index++) {
-            for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
-                if (vector_index < input_size)
-                    input->buffer[vector_index][data_index] =
-                        train_data[actually_trained + data_index]->buffer[vector_index];
-                if (vector_index < output_size)
-                    output->buffer[vector_index][data_index] =
-                        train_output[actually_trained + data_index]->buffer[vector_index];
+        if (not_trained != 0) {
+            // First train separately the small portion of the dataset left out by the iteration division
+            set_batch_size(trainer->nn, not_trained);
+            input  = new_uninitialized_matrix(input_size , not_trained);
+            output = new_uninitialized_matrix(output_size , not_trained);
+
+            // Fill input & output matrices
+            // I feel like filling both matrices at the same time using if statements to check boundaries
+            // is more efficient than looping twice ?
+            for (size_t data_index = 0; data_index < not_trained; data_index++) {
+                for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
+                    if (vector_index < input_size)
+                        input->buffer[vector_index][data_index] =
+                            train_data[actually_trained + data_index]->buffer[vector_index];
+                    if (vector_index < output_size)
+                        output->buffer[vector_index][data_index] =
+                            train_output[actually_trained + data_index]->buffer[vector_index];
+                }
             }
+
+            // Train the small batch
+            forward_pass(trainer->nn, input);
+            back_propagation(trainer->nn, input, output);
+
+            free_matrix(input);
+            free_matrix(output);
         }
 
-        // Train the small batch here
-        // ...
-
-        printf("Created input matrix:\n");
-        print_matrix(input);
-        printf("Created output matrix:\n");
-        print_matrix(output);
-
-        // Now we take care of the rest
-        free_matrix(input);
-        free_matrix(output);
+        // Now we take care of the rest (aka normal sized batches)
         input  = new_uninitialized_matrix(input_size , trainer->batch_size);
         output = new_uninitialized_matrix(output_size , trainer->batch_size);
         for (size_t iteration = 0; iteration < iterations; iteration++) {
             // Fill input & output matrices
+            // I feel like filling both matrices at the same time using if statements to check boundaries
+            // is more efficient than looping twice ?
             for (size_t data_index = 0; data_index < trainer->batch_size; data_index++) {
                 for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
                     size_t dataset_index = iteration * trainer->batch_size + data_index;
@@ -72,14 +76,12 @@ void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, si
                             train_output[dataset_index]->buffer[vector_index];
                 }
             }
-            // Train batch here
-            // ...
-            
-            printf("Created input matrix:\n");
-            print_matrix(input);
-            printf("Created output matrix:\n");
-            print_matrix(output);
+
+            // Train batch
+            forward_pass(trainer->nn, input);
+            back_propagation(trainer->nn, input, output);
         }
+
         free_matrix(input);
         free_matrix(output);
     }

@@ -55,7 +55,7 @@ void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
 void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
     if (inputs->rows != nn->input_size) {
         printf(
-                "Size of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)",
+                "Size of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)\n",
                 inputs->rows,
                 nn->input_size
         );
