@@ -12,6 +12,8 @@ typedef struct {
     size_t batch_size;
 } ModelTrainer;
 
-void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size);
+// train_data & train_output HAVE to be sized just like the neural network input & output
+// or else consequences
+void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
 
 #endif // NCN_MODEL_TRAINER_H

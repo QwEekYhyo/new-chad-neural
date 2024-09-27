@@ -13,7 +13,7 @@
  */
 
 // train_data and train_output should oviously be the same size (dataset_size)
-void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size) {
+void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
 
     size_t input_size = trainer->nn->input_size;
     size_t output_size = trainer->nn->output_layer->rows;
@@ -42,10 +42,10 @@ void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, si
                 for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
                     if (vector_index < input_size)
                         input->buffer[vector_index][data_index] =
-                            train_data[actually_trained + data_index]->buffer[vector_index];
+                            train_data[(actually_trained + data_index) * input_size + vector_index];
                     if (vector_index < output_size)
                         output->buffer[vector_index][data_index] =
-                            train_output[actually_trained + data_index]->buffer[vector_index];
+                            train_output[(actually_trained + data_index) * output_size + vector_index];
                 }
             }
 
@@ -70,10 +70,10 @@ void train(ModelTrainer* trainer, Vector** train_data, Vector** train_output, si
 
                     if (vector_index < input_size)
                         input->buffer[vector_index][data_index] =
-                            train_data[dataset_index]->buffer[vector_index];
+                            train_data[dataset_index * input_size + vector_index];
                     if (vector_index < output_size)
                         output->buffer[vector_index][data_index] =
-                            train_output[dataset_index]->buffer[vector_index];
+                            train_output[dataset_index * output_size + vector_index];
                 }
             }
 
