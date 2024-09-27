@@ -3,6 +3,7 @@
 #include <vector.h>
 #include <neural_network.h>
 #include <utils.h>
+#include <model_trainer.h>
 
 #include <stdio.h>
 #include <sys/time.h>
@@ -26,6 +27,7 @@ double f(double x) {
     return 0.4 * x + 0.2;
 }
 
+/*
 int main(void) {
     struct timeval tm;
     gettimeofday(&tm, NULL);
@@ -77,5 +79,34 @@ int main(void) {
     free_matrix(input);
     free_matrix(expected_output);
     free_neural_network(nn);
+    return 0;
+}
+*/
+
+int main(void) {
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    srandom(tm.tv_sec + tm.tv_usec * 1000000ul);
+
+    NeuralNetwork* nn = new_neural_network(2, 3, 1);
+    ModelTrainer trainer;
+    trainer.nn = nn;
+    trainer.batch_size = 3;
+    trainer.epochs = 1;
+
+    Vector* data[10];
+    for (int i = 0; i < 10; i++) {
+        data[i] = new_random_vector(2);
+        printf("Created input vector:\n");
+        print_vector(data[i]);
+    }
+    Vector* output_data[10];
+    for (int i = 0; i < 10; i++) {
+        output_data[i] = new_random_vector(1);
+        printf("Created output vector:\n");
+        print_vector(output_data[i]);
+    }
+    train(&trainer, data, output_data, 10);
+
     return 0;
 }
