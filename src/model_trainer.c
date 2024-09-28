@@ -4,6 +4,7 @@
 #include <utils.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
  * 1 epoch    = all dataset covered
@@ -14,6 +15,20 @@
 
 // train_data and train_output should oviously be the same size (dataset_size)
 void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
+    _train(trainer, train_data, train_output, dataset_size, 0, NULL);
+}
+
+double* train_with_history(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
+    double* loss_history = malloc(trainer->epochs * sizeof(double));
+    _train(trainer, train_data, train_output, dataset_size, 1, &loss_history);
+    return loss_history;
+}
+
+void _train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size, uint_least8_t with_history, double** loss_history) {
+    if (with_history && !loss_history) {
+        printf("Called train with history without providing pointer to store loss history\n");
+        return;
+    }
 
     size_t input_size = trainer->nn->input_size;
     size_t output_size = trainer->nn->output_layer->rows;
@@ -28,6 +43,8 @@ void train(ModelTrainer* trainer, double* train_data, double* train_output, size
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
         if (epoch % 100 == 0)
             printf("training epoch = %lu\n", epoch);
+
+        double current_loss = 0;
 
         if (not_trained != 0) {
             // First train separately the small portion of the dataset left out by the iteration division
@@ -51,6 +68,16 @@ void train(ModelTrainer* trainer, double* train_data, double* train_output, size
 
             // Train the small batch
             forward_pass(trainer->nn, input);
+            if (with_history) {
+                // Add loss
+                for (size_t o = 0; o < not_trained; o++) {
+                    for (size_t i = 0; i < output_size; i++) {
+                        double difference =
+                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
+                        current_loss += difference * difference;
+                    }
+                }
+            }
             back_propagation(trainer->nn, input, output);
 
             free_matrix(input);
@@ -79,8 +106,21 @@ void train(ModelTrainer* trainer, double* train_data, double* train_output, size
 
             // Train batch
             forward_pass(trainer->nn, input);
+            if (with_history) {
+                // Add loss
+                for (size_t o = 0; o < trainer->batch_size; o++) {
+                    for (size_t i = 0; i < output_size; i++) {
+                        double difference =
+                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
+                        current_loss += difference * difference;
+                    }
+                }
+            }
             back_propagation(trainer->nn, input, output);
         }
+
+        if (with_history)
+            (*loss_history)[epoch] = current_loss / (dataset_size * output_size);
 
         free_matrix(input);
         free_matrix(output);

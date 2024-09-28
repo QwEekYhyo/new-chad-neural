@@ -36,7 +36,7 @@ int main(void) {
     trainer.batch_size = 10;
     trainer.epochs = 2000;
 
-    train(&trainer, data[0], output_data[0], dataset_size);
+    double* loss_history = train_with_history(&trainer, data[0], output_data[0], dataset_size);
 
     printf("testing training results:\n");
     Matrix* input = new_uninitialized_matrix(1, 3);
@@ -53,6 +53,13 @@ int main(void) {
         );
     }
 
+    printf("loss history:\n");
+    for (size_t i = 0; i < trainer.epochs; i++) {
+        printf("%f, ", loss_history[i]);
+    }
+    printf("\n");
+
+    free(loss_history);
     free_matrix(input);
     free_neural_network(nn);
 
