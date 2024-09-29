@@ -4,7 +4,12 @@
 #include <math.h>
 
 double rand_double_range(int min, int max) {
-    double scale = random() / (double) RAND_MAX;
+#if defined(_POSIX_VERSION)
+    int n = random();
+#else
+    int n = rand();
+#endif
+    double scale = n / (double) RAND_MAX;
     return min + scale * (max - min);
 }
 
