@@ -6,8 +6,16 @@
 #include <model_trainer.h>
 
 #include <stdio.h>
+#if defined(_POSIX_VERSION)
 #include <sys/time.h>
+#else
+#include <time.h>
+#endif
 #include <stdlib.h>
+
+#define INPUT_SIZE 1
+#define OUTPUT_SIZE 1
+#define DATASET_SIZE 100
 
 double f(double x) {
     return 0.4 * x + 0.2;
@@ -15,28 +23,29 @@ double f(double x) {
 
 int main(void) {
     // Better randomization
+#if defined(_POSIX_VERSION)
     struct timeval tm;
     gettimeofday(&tm, NULL);
     srandom(tm.tv_sec + tm.tv_usec * 1000000ul);
+#else
+    srand((unsigned int) time(NULL));
+#endif
 
     // Create dataset
-    int input_size = 1;
-    int output_size = 1;
-    size_t dataset_size = 100;
-    double data[dataset_size][input_size];
-    double output_data[dataset_size][output_size];
-    for (size_t i = 0; i < dataset_size; i++) {
-        data[i][0] = (double) i / dataset_size;
+    double data[DATASET_SIZE][INPUT_SIZE];
+    double output_data[DATASET_SIZE][OUTPUT_SIZE];
+    for (size_t i = 0; i < DATASET_SIZE; i++) {
+        data[i][0] = (double) i / DATASET_SIZE;
         output_data[i][0] = f(data[i][0]);
     }
 
-    NeuralNetwork* nn = new_neural_network(input_size, 3, output_size);
+    NeuralNetwork* nn = new_neural_network(INPUT_SIZE, 3, OUTPUT_SIZE);
     ModelTrainer trainer;
     trainer.nn = nn;
     trainer.batch_size = 10;
     trainer.epochs = 2000;
 
-    double* loss_history = train_with_history(&trainer, data[0], output_data[0], dataset_size);
+    double* loss_history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);
 
     printf("testing training results:\n");
     Matrix* input = new_uninitialized_matrix(1, 3);
