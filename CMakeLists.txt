@@ -12,5 +12,7 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -O3)
 endif()
 
+enable_testing()
+
 add_subdirectory(src)
 add_subdirectory(tests)
