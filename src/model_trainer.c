@@ -30,6 +30,13 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         return;
     }
 
+    if (!trainer->learning_rate)
+        trainer->learning_rate = 0.01; // default learning_rate
+    if (!trainer->epochs)
+        trainer->epochs = 100; // default epochs
+    if (!trainer->batch_size)
+        trainer->batch_size = 32; // default batch_size
+
     size_t input_size = trainer->nn->input_size;
     size_t output_size = trainer->nn->output_layer->rows;
     size_t max_size = max(input_size, output_size);
@@ -82,7 +89,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                     }
                 }
             }
-            back_propagation(trainer->nn, input, output);
+            back_propagation(trainer->nn, input, output, trainer->learning_rate);
 
             free_matrix(input);
             free_matrix(output);
@@ -121,7 +128,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                     }
                 }
             }
-            back_propagation(trainer->nn, input, output);
+            back_propagation(trainer->nn, input, output, trainer->learning_rate);
         }
 
         if (with_history)

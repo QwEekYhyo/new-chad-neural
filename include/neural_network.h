@@ -5,8 +5,6 @@
 #include <vector.h>
 #include <matrix.h>
 
-static const double LEARNING_RATE = 0.01;
-
 typedef struct {
     size_t input_size;
     Matrix* hidden_layer;
@@ -29,6 +27,6 @@ void set_activation_functions(NeuralNetwork* nn, activation_function af, activat
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs);
-void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs);
+void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
 
 #endif // NCN_NEURAL_NETWORK_H

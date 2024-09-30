@@ -111,7 +111,7 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
 }
 
 // forward_pass needs to be called before this function
-void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets) {
+void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double learning_rate) {
     // Calculate output error
     Matrix* output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
@@ -140,14 +140,14 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets) {
             for (size_t b = 0; b < nn->output_layer->columns; b++) {
                 weight_update += output_errors->buffer[o][b] * nn->hidden_layer->buffer[h][b];
             }
-            nn->hidden_output_weights->buffer[o][h] += LEARNING_RATE * weight_update / nn->output_layer->columns; // average over batch
+            nn->hidden_output_weights->buffer[o][h] += learning_rate * weight_update / nn->output_layer->columns; // average over batch
         }
         // Update output biases (biases are shared across batch examples, so sum the errors)
         double bias_update = 0.0;
         for (size_t b = 0; b < nn->output_layer->columns; b++) {
             bias_update += output_errors->buffer[o][b];
         }
-        nn->output_biases->buffer[o] += LEARNING_RATE * bias_update / nn->output_layer->columns; // average over batch
+        nn->output_biases->buffer[o] += learning_rate * bias_update / nn->output_layer->columns; // average over batch
     }
 
 
@@ -158,14 +158,14 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets) {
             for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
                 weight_update += hidden_errors->buffer[h][b] * inputs->buffer[i][b];
             }
-            nn->input_hidden_weights->buffer[h][i] += LEARNING_RATE * weight_update / nn->hidden_layer->columns; // average over batch
+            nn->input_hidden_weights->buffer[h][i] += learning_rate * weight_update / nn->hidden_layer->columns; // average over batch
         }
         // Update hidden biases
         double bias_update = 0.0;
         for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
             bias_update += hidden_errors->buffer[h][b];
         }
-        nn->hidden_biases->buffer[h] += LEARNING_RATE * bias_update / nn->hidden_layer->columns; // average over batch
+        nn->hidden_biases->buffer[h] += learning_rate * bias_update / nn->hidden_layer->columns; // average over batch
     }
 
     free_matrix(output_errors);
