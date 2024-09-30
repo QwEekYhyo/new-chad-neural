@@ -15,12 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <vector.h>
 #include <utils.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
+// Maybe check that size is not zero ?
 Vector* new_uninitialized_vector(size_t size) {
     Vector* new_vector = malloc(sizeof(Vector));
     new_vector->size = size;
@@ -69,6 +72,7 @@ int save_vector(Vector* vector, const char* filename) {
         return -1;
     }
 
+    fprintf(file, "%c ", 'V');
     fprintf(file, "%zu\n", vector->size);
     for (size_t i = 0; i < vector->size; i++) {
         fprintf(file, "%.15lf ", vector->buffer[i]);
@@ -78,4 +82,26 @@ int save_vector(Vector* vector, const char* filename) {
     
     fclose(file);
     return 0;
+}
+
+Vector* new_vector_from_file(FILE* file) {
+    char type;
+    fscanf(file, "%c", &type);
+    if (type != 'V') {
+        printf("Type \"%c\" is not Vector type\n", type);
+        return NULL;
+    }
+
+    size_t size;
+    fscanf(file, "%zu", &size);
+
+    Vector* new_vector = new_uninitialized_vector(size);
+    for (size_t i = 0; i < size; i++) {
+        fscanf(file, "%lf", &new_vector->buffer[i]);
+    }
+
+    char delimiter[5];
+    fscanf(file, "%5c", delimiter);
+
+    return new_vector;
 }

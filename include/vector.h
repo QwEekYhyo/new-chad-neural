@@ -19,6 +19,7 @@
 #define NCN_VECTOR_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct {
     size_t size;
@@ -33,5 +34,6 @@ void free_vector(Vector* vector);
 void print_vector(Vector* vector);
 
 int save_vector(Vector* vector, const char* filename);
+Vector* new_vector_from_file(FILE* file);
 
 #endif // NCN_VECTOR_H

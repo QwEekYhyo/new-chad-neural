@@ -4,3 +4,4 @@ build/
 .vscode/
 
 *.ncn
+!tests/test_vector.ncn

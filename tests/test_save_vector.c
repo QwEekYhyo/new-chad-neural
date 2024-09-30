@@ -46,6 +46,16 @@ int main(void) {
         printf("Error while opening file where vector is saved\n");
         return 1;
     }
+
+    char type;
+    fscanf(file, "%c", &type);
+    if (type != 'V') {
+        printf("Saved type is not Vector type, got: %c\n",
+                type
+        );
+        return 1;
+    }
+
     size_t size;
     fscanf(file, "%zu", &size);
     if (size != v->size) {
