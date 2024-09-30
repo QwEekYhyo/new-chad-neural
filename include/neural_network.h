@@ -5,6 +5,8 @@
 #include <vector.h>
 #include <matrix.h>
 
+#include <stddef.h>
+
 typedef struct {
     size_t input_size;
     Matrix* hidden_layer;

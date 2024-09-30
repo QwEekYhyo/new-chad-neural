@@ -49,11 +49,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     Matrix* output;
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
         if (epoch % 100 == 0)
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
             printf("training epoch = %zu\n", epoch);
-#else
-            printf("training epoch = %lu\n", epoch);
-#endif
 
         double current_loss = 0;
 

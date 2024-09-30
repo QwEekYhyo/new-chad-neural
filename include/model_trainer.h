@@ -1,9 +1,9 @@
 #ifndef NCN_MODEL_TRAINER_H
 #define NCN_MODEL_TRAINER_H
 
-#include <common_defs.h>
 #include <neural_network.h>
 
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {

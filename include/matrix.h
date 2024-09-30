@@ -1,7 +1,7 @@
 #ifndef NCN_MATRIX_H
 #define NCN_MATRIX_H
 
-#include <common_defs.h>
+#include <stddef.h>
 
 typedef struct {
     size_t rows;
