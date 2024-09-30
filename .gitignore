@@ -2,3 +2,5 @@ build/
 .cache/
 .vs/
 .vscode/
+
+*.ncn

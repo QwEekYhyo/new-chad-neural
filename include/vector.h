@@ -15,4 +15,6 @@ void free_vector(Vector* vector);
 
 void print_vector(Vector* vector);
 
+int save_vector(Vector* vector, const char* filename);
+
 #endif // NCN_VECTOR_H

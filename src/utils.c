@@ -1,7 +1,6 @@
 #include <utils.h>
 
 #include <stdlib.h>
-#include <math.h>
 
 double rand_double_range(int min, int max) {
 #if defined(_POSIX_VERSION)

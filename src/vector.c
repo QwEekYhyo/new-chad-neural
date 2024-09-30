@@ -44,3 +44,21 @@ void print_vector(Vector* vector) {
     }
     printf("]\n");
 }
+
+int save_vector(Vector* vector, const char* filename) {
+    FILE* file = fopen(filename, "a");
+    if (!file) {
+        printf("Could not open file %s for writting\n", filename);
+        return -1;
+    }
+
+    fprintf(file, "%zu\n", vector->size);
+    for (size_t i = 0; i < vector->size; i++) {
+        fprintf(file, "%.15lf ", vector->buffer[i]);
+    }
+    fprintf(file, "\n");
+    fprintf(file, "---\n");
+    
+    fclose(file);
+    return 0;
+}
