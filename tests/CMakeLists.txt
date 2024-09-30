@@ -1,7 +1,12 @@
 enable_testing()
 
-add_executable(test_main test_main.c)
+file(GLOB_RECURSE SOURCES *.c)
 
-target_link_libraries(test_main new_chad_neural)
+foreach(SOURCE ${SOURCES})
+    get_filename_component(FILE_NAME ${SOURCE} NAME_WE)
 
-add_test(NAME RunMain COMMAND test_main)
+    add_executable(${FILE_NAME} ${SOURCE})
+    target_link_libraries(${FILE_NAME} new_chad_neural)
+
+    add_test(NAME "Run${FILE_NAME}" COMMAND ${FILE_NAME})
+endforeach()
