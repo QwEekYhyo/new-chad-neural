@@ -172,3 +172,21 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     free_matrix(output_errors);
     free_matrix(hidden_errors);
 }
+
+int save_neural_network(NeuralNetwork* nn, const char* filename) {
+    FILE* save_file = fopen(filename, "a");
+    if (!save_file) {
+        printf("Could not open file to save Neural Network\n");
+        return -1;
+    }
+
+    save_matrix(nn->input_hidden_weights, save_file);
+    save_matrix(nn->hidden_output_weights, save_file);
+
+    save_vector(nn->hidden_biases, save_file);
+    save_vector(nn->output_biases, save_file);
+
+    fclose(save_file);
+
+    return 0;
+}

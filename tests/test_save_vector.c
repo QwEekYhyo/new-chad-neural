@@ -34,19 +34,22 @@ int main(void) {
 
     print_vector(v);
 
-    int error = save_vector(v, FILENAME);
+    FILE* file = fopen(FILENAME, "a");
+    if (!file) {
+        printf("Could not open file to save Vector\n");
+        return 1;
+    }
+
+    int error = save_vector(v, file);
     if (error != 0) {
         printf("Error while saving vector\n");
         return 1;
     }
+    fclose(file);
 
     // Check if it was correctly saved
-    FILE* file = fopen(FILENAME, "r");
-    if (!file) {
-        printf("Error while opening file where vector is saved\n");
-        return 1;
-    }
-
+    file = fopen(FILENAME, "r");
+    
     char type;
     fscanf(file, "%c", &type);
     if (type != 'V') {

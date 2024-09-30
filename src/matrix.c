@@ -83,10 +83,9 @@ void print_matrix(Matrix* matrix) {
     }
 }
 
-int save_matrix(Matrix* matrix, const char* filename) {
-    FILE* file = fopen(filename, "a");
+int save_matrix(Matrix* matrix, FILE* file) {
     if (!file) {
-        printf("Could not open file %s for writting\n", filename);
+        printf("No opened file provided to save Matrix\n");
         return -1;
     }
 
@@ -100,7 +99,6 @@ int save_matrix(Matrix* matrix, const char* filename) {
     }
     fprintf(file, "---\n");
     
-    fclose(file);
     return 0;
 }
 

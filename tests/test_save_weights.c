@@ -27,6 +27,8 @@
 #define OUTPUT_SIZE 2
 #define DATASET_SIZE 100
 
+const char* FILENAME = "neural_network.ncn";
+
 double f(double x) {
     return -0.8 * x + 0.9;
 }
@@ -55,6 +57,8 @@ int main(void) {
     print_vector(nn->hidden_biases);
     printf("Bo:\n");
     print_vector(nn->output_biases);
+
+    save_neural_network(nn, FILENAME);
 
     free_neural_network(nn);
 

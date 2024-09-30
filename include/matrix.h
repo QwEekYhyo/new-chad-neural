@@ -34,7 +34,7 @@ void free_matrix(Matrix* matrix);
 
 void print_matrix(Matrix* matrix);
 
-int save_matrix(Matrix* matrix, const char* filename);
+int save_matrix(Matrix* matrix, FILE* file);
 Matrix* new_matrix_from_file(FILE* file);
 
 #endif // NCN_MATRIX_H

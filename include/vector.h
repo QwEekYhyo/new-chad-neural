@@ -33,7 +33,7 @@ void free_vector(Vector* vector);
 
 void print_vector(Vector* vector);
 
-int save_vector(Vector* vector, const char* filename);
+int save_vector(Vector* vector, FILE* file);
 Vector* new_vector_from_file(FILE* file);
 
 #endif // NCN_VECTOR_H

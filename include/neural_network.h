@@ -48,4 +48,6 @@ void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 void forward_pass(NeuralNetwork* nn, Matrix* inputs);
 void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
 
+int save_neural_network(NeuralNetwork* nn, const char* filename);
+
 #endif // NCN_NEURAL_NETWORK_H

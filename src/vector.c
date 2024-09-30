@@ -65,10 +65,9 @@ void print_vector(Vector* vector) {
     printf("]\n");
 }
 
-int save_vector(Vector* vector, const char* filename) {
-    FILE* file = fopen(filename, "a");
+int save_vector(Vector* vector, FILE* file) {
     if (!file) {
-        printf("Could not open file %s for writting\n", filename);
+        printf("No opened file provided to save Vector\n");
         return -1;
     }
 
@@ -80,7 +79,6 @@ int save_vector(Vector* vector, const char* filename) {
     fprintf(file, "\n");
     fprintf(file, "---\n");
     
-    fclose(file);
     return 0;
 }
 
