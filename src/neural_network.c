@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "matrix.h"
 #include <neural_network.h>
 #include <utils.h>
 
@@ -189,4 +190,32 @@ int save_neural_network(NeuralNetwork* nn, const char* filename) {
     fclose(save_file);
 
     return 0;
+}
+
+NeuralNetwork* new_neural_network_from_file(const char* filename) {
+    NeuralNetwork* new_nn = malloc(sizeof(NeuralNetwork));
+
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        printf("Could not open file for reading to load Neural Network\n");
+        return NULL;
+    }
+
+    new_nn->input_hidden_weights = new_matrix_from_file(file);
+    new_nn->hidden_output_weights = new_matrix_from_file(file);
+
+    new_nn->hidden_biases = new_vector_from_file(file);
+    new_nn->output_biases = new_vector_from_file(file);
+
+    new_nn->input_size = new_nn->input_hidden_weights->columns;
+
+    size_t default_batch_size = 1;
+    new_nn->hidden_layer = new_uninitialized_matrix(new_nn->hidden_biases->size, default_batch_size);
+    new_nn->output_layer = new_uninitialized_matrix(new_nn->output_biases->size, default_batch_size);
+
+    set_activation_functions(new_nn, identity, identity_derivative);
+
+    fclose(file);
+
+    return new_nn;
 }

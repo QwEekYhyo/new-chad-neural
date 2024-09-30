@@ -49,5 +49,6 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs);
 void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
 
 int save_neural_network(NeuralNetwork* nn, const char* filename);
+NeuralNetwork* new_neural_network_from_file(const char* filename);
 
 #endif // NCN_NEURAL_NETWORK_H

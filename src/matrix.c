@@ -106,7 +106,7 @@ Matrix* new_matrix_from_file(FILE* file) {
     char type;
     fscanf(file, "%c", &type);
     if (type != 'M') {
-        printf("Type \"%c\" is not Vector type\n", type);
+        printf("Type \"%c\" is not Matrix type\n", type);
         return NULL;
     }
 
@@ -120,8 +120,8 @@ Matrix* new_matrix_from_file(FILE* file) {
         }
     }
 
-    char delimiter[5];
-    fscanf(file, "%5c", delimiter);
+    char delimiter[6];
+    fscanf(file, "%6c", delimiter);
 
     return new_matrix;
 }

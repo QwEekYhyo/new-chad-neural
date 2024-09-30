@@ -98,8 +98,8 @@ Vector* new_vector_from_file(FILE* file) {
         fscanf(file, "%lf", &new_vector->buffer[i]);
     }
 
-    char delimiter[5];
-    fscanf(file, "%5c", delimiter);
+    char delimiter[6];
+    fscanf(file, "%6c", delimiter);
 
     return new_vector;
 }
