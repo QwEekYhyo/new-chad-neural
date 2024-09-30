@@ -89,6 +89,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         }
 
         // Now we take care of the rest (aka normal sized batches)
+        set_batch_size(trainer->nn, trainer->batch_size);
         input  = new_uninitialized_matrix(input_size , trainer->batch_size);
         output = new_uninitialized_matrix(output_size , trainer->batch_size);
         for (size_t iteration = 0; iteration < iterations; iteration++) {

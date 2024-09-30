@@ -56,15 +56,32 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
     if (inputs->rows != nn->input_size) {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
         printf(
-            "Size of given inputs (%zu) doesn't match number of input nodes in neural network (%zu)\n",
-            inputs->rows,
-            nn->input_size
+                "Size of given inputs (%zu) doesn't match number of input nodes in neural network (%zu)\n",
+                inputs->rows,
+                nn->input_size
         );
 #else
         printf(
                 "Size of given inputs (%lu) doesn't match number of input nodes in neural network (%lu)\n",
                 inputs->rows,
                 nn->input_size
+        );
+#endif
+        return;
+    }
+
+    if (inputs->columns != nn->output_layer->columns) {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+        printf(
+                "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
+                inputs->columns,
+                nn->output_layer->columns
+        );
+#else
+        printf(
+                "Batch size is not set correctly, got a batch of size %lu while NN is set to %lu\n",
+                inputs->columns,
+                nn->output_layer->columns
         );
 #endif
         return;

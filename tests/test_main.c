@@ -63,9 +63,8 @@ int main(void) {
     }
 
     printf("loss history:\n");
-    for (size_t i = 0; i < trainer.epochs; i++) {
+    for (size_t i = 0; i < trainer.epochs; i++)
         printf("%f, ", loss_history[i]);
-    }
     printf("\n");
 
     free(loss_history);
