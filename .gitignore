@@ -5,3 +5,4 @@ build/
 
 *.ncn
 !tests/test_vector.ncn
+!tests/test_matrix.ncn

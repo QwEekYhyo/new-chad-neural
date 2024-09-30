@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <matrix.h>
 #include <utils.h>
 
@@ -100,4 +102,28 @@ int save_matrix(Matrix* matrix, const char* filename) {
     
     fclose(file);
     return 0;
+}
+
+Matrix* new_matrix_from_file(FILE* file) {
+    char type;
+    fscanf(file, "%c", &type);
+    if (type != 'M') {
+        printf("Type \"%c\" is not Vector type\n", type);
+        return NULL;
+    }
+
+    size_t rows, columns;
+    fscanf(file, "%zu %zu", &rows, &columns);
+
+    Matrix* new_matrix = new_uninitialized_matrix(rows, columns);
+    for (size_t r = 0; r < rows; r++) {
+        for (size_t c = 0; c < columns; c++) {
+            fscanf(file, "%lf", &new_matrix->buffer[r][c]);
+        }
+    }
+
+    char delimiter[5];
+    fscanf(file, "%5c", delimiter);
+
+    return new_matrix;
 }

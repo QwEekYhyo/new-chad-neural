@@ -19,6 +19,7 @@
 #define NCN_MATRIX_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct {
     size_t rows;
@@ -34,5 +35,6 @@ void free_matrix(Matrix* matrix);
 void print_matrix(Matrix* matrix);
 
 int save_matrix(Matrix* matrix, const char* filename);
+Matrix* new_matrix_from_file(FILE* file);
 
 #endif // NCN_MATRIX_H
