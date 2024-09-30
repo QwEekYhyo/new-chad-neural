@@ -1,5 +1,4 @@
 #include <matrix.h>
-#include <time.h>
 #include <vector.h>
 #include <neural_network.h>
 #include <utils.h>
@@ -8,7 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
 
 #define INPUT_SIZE 1
 #define OUTPUT_SIZE 1

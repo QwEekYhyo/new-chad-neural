@@ -1,17 +1,16 @@
 #include <matrix.h>
-#include <time.h>
 #include <vector.h>
 #include <neural_network.h>
 #include <utils.h>
 #include <model_trainer.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 #if defined(_POSIX_VERSION)
 #include <sys/time.h>
 #else
 #include <time.h>
 #endif
-#include <stdlib.h>
 
 #define INPUT_SIZE 1
 #define OUTPUT_SIZE 1
