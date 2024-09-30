@@ -33,4 +33,6 @@ void free_matrix(Matrix* matrix);
 
 void print_matrix(Matrix* matrix);
 
+int save_matrix(Matrix* matrix, const char* filename);
+
 #endif // NCN_MATRIX_H

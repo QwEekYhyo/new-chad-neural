@@ -80,3 +80,24 @@ void print_matrix(Matrix* matrix) {
         printf("]\n");
     }
 }
+
+int save_matrix(Matrix* matrix, const char* filename) {
+    FILE* file = fopen(filename, "a");
+    if (!file) {
+        printf("Could not open file %s for writting\n", filename);
+        return -1;
+    }
+
+    fprintf(file, "%c ", 'M');
+    fprintf(file, "%zu %zu\n", matrix->rows, matrix->columns);
+    for (size_t r = 0; r < matrix->rows; r++) {
+        for (size_t c = 0; c < matrix->columns; c++) {
+            fprintf(file, "%.15lf ", matrix->buffer[r][c]);
+        }
+        fprintf(file, "\n");
+    }
+    fprintf(file, "---\n");
+    
+    fclose(file);
+    return 0;
+}
