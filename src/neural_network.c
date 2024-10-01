@@ -184,6 +184,12 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
 }
 
 int save_neural_network(NeuralNetwork* nn, const char* filename) {
+    // No error checking for remove() because:
+    // - if the file doesn't exist -> I don't care + ratio
+    // - if permissions aren't sufficient -> fopen will fail
+    // - if file contains invalid characters -> fopen will fail
+    remove(filename);
+
     FILE* save_file = fopen(filename, "a");
     if (!save_file) {
         printf("Could not open file to save Neural Network\n");
