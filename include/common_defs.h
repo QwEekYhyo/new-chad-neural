@@ -19,5 +19,6 @@
 #define NCN_COMMON_DEFS_H
 
 typedef double (*activation_function)(double);
+typedef double (*loss_function)(double, double);
 
 #endif // NCN_COMMON_DEFS_H

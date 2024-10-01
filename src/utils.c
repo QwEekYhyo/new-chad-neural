@@ -47,3 +47,19 @@ double sigmoid(double x) {
 double sigmoid_derivative(double x) {
     return x * (1 - x);
 }
+
+double mean_squared_error(double target, double output) {
+    return 0.5 * (target - output) * (target - output);
+}
+
+double mean_squared_error_derivative(double target, double output) {
+    return target - output;
+}
+
+double binary_cross_entropy(double target, double output) {
+    return - (target * log(output) + (1 - target) * log(1 - output));
+}
+
+double binary_cross_entropy_derivative(double target, double output) {
+    return (output - target) / (output * (1 - output));
+}
