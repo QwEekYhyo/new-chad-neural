@@ -25,7 +25,8 @@ int main(void) {
     }
 
     NeuralNetwork* nn = new_neural_network(INPUT_SIZE, 10, OUTPUT_SIZE);
-    set_activation_functions(nn, sigmoid, sigmoid_derivative);
+    set_hidden_activation_functions(nn, sigmoid, sigmoid_derivative);
+    set_output_activation_functions(nn, sigmoid, sigmoid_derivative);
     ModelTrainer trainer;
     trainer.nn = nn;
     trainer.learning_rate = 0.8;

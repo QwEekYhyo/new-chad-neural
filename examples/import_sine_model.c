@@ -6,7 +6,8 @@
 
 int main(void) {
     NeuralNetwork* nn = new_neural_network_from_file("sine_model.ncn");
-    set_activation_functions(nn, sigmoid, sigmoid_derivative);
+    set_hidden_activation_functions(nn, sigmoid, sigmoid_derivative);
+    set_output_activation_functions(nn, sigmoid, sigmoid_derivative);
 
     Matrix* input = new_uninitialized_matrix(1, 10);
     set_batch_size(nn, 10);
