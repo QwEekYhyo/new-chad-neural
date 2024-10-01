@@ -49,7 +49,7 @@ double sigmoid_derivative(double x) {
 }
 
 double mean_squared_error(double target, double output) {
-    return 0.5 * (target - output) * (target - output);
+    return (target - output) * (target - output);
 }
 
 double mean_squared_error_derivative(double target, double output) {

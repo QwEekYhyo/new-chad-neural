@@ -18,6 +18,11 @@
 #ifndef NCN_COMMON_DEFS_H
 #define NCN_COMMON_DEFS_H
 
+enum LossFunction {
+    MSE, // Mean Squared Error
+    BCE, // Binary Cross Entropy
+};
+
 typedef double (*activation_function)(double);
 typedef double (*loss_function)(double, double);
 

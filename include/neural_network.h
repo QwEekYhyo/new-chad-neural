@@ -37,6 +37,8 @@ typedef struct {
 
     activation_function activation_function;
     activation_function activation_function_derivative;
+
+    loss_function loss_function_derivative;
 } NeuralNetwork;
 
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);

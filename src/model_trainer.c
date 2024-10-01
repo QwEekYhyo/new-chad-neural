@@ -30,6 +30,26 @@
  * iteration  = number of passes needed to perform 1 epoch
  */
 
+int set_loss_function(ModelTrainer* trainer, enum LossFunction loss) {
+    if (!trainer->nn) {
+        printf("Could not set loss function: no Neural Network associated with Model Trainer\n");
+        return -1;
+    }
+
+    switch (loss) {
+        case MSE:
+            trainer->loss_function = mean_squared_error;
+            trainer->nn->loss_function_derivative = mean_squared_error_derivative;
+            break;
+        case BCE:
+            trainer->loss_function = binary_cross_entropy;
+            trainer->nn->loss_function_derivative = binary_cross_entropy_derivative;
+            break;
+    }
+
+    return 0;
+}
+
 // train_data and train_output should oviously be the same size (dataset_size)
 void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
     _train(trainer, train_data, train_output, dataset_size, 0, NULL);
@@ -53,6 +73,8 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         trainer->epochs = 100; // default epochs
     if (!trainer->batch_size)
         trainer->batch_size = 32; // default batch_size
+    if (with_history && !trainer->loss_function)
+        trainer->loss_function = mean_squared_error; // default loss_function
 
     size_t input_size = trainer->nn->input_size;
     size_t output_size = trainer->nn->output_layer->rows;
@@ -65,8 +87,11 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     Matrix* input;
     Matrix* output;
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
-        if (epoch % 100 == 0)
-            printf("training epoch = %zu\n", epoch);
+        if (epoch % 100 == 0) {
+            printf("training epoch = %zu", epoch);
+            if (!with_history)
+                printf("\n");
+        }
 
         double current_loss = 0;
 
@@ -96,9 +121,10 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                 // Add loss
                 for (size_t o = 0; o < not_trained; o++) {
                     for (size_t i = 0; i < output_size; i++) {
-                        double difference =
-                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
-                        current_loss += difference * difference;
+                        current_loss += trainer->loss_function(
+                                output->buffer[i][o],
+                                trainer->nn->output_layer->buffer[i][o]
+                        );
                     }
                 }
             }
@@ -135,17 +161,23 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                 // Add loss
                 for (size_t o = 0; o < trainer->batch_size; o++) {
                     for (size_t i = 0; i < output_size; i++) {
-                        double difference =
-                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
-                        current_loss += difference * difference;
+                        current_loss += trainer->loss_function(
+                                output->buffer[i][o],
+                                trainer->nn->output_layer->buffer[i][o]
+                        );
                     }
                 }
             }
             back_propagation(trainer->nn, input, output, trainer->learning_rate);
         }
 
-        if (with_history)
-            (*loss_history)[epoch] = current_loss / (dataset_size * output_size);
+        if (with_history) {
+            double average_loss = current_loss / (dataset_size * output_size);
+            (*loss_history)[epoch] = average_loss;
+
+            if (epoch % 100 == 0)
+                printf(" - loss = %.15f\n", average_loss);
+        }
 
         free_matrix(input);
         free_matrix(output);

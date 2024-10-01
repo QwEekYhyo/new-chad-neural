@@ -19,6 +19,7 @@
 #define NCN_MODEL_TRAINER_H
 
 #include <neural_network.h>
+#include <common_defs.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -29,7 +30,11 @@ typedef struct {
     double learning_rate;
     size_t epochs;
     size_t batch_size;
+
+    loss_function loss_function;
 } ModelTrainer;
+
+int set_loss_function(ModelTrainer* trainer, enum LossFunction loss);
 
 // train_data & train_output HAVE to be sized just like the neural network input & output
 // or else consequences

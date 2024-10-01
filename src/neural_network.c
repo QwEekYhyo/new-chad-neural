@@ -36,7 +36,8 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
     new_nn->hidden_biases = new_random_vector(num_hidden);
     new_nn->output_biases = new_random_vector(num_outputs);
 
-    set_activation_functions(new_nn, identity, identity_derivative);
+    set_activation_functions(new_nn, identity, identity_derivative); // default activation functions
+    new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
 
     return new_nn;
 }
@@ -119,7 +120,9 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
-            output_errors->buffer[o][b] = (targets->buffer[o][b] - current_output) * nn->activation_function_derivative(current_output);
+            output_errors->buffer[o][b] =
+                nn->loss_function_derivative(targets->buffer[o][b], current_output)
+                * nn->activation_function_derivative(current_output);
         }
     }
 
@@ -213,7 +216,8 @@ NeuralNetwork* new_neural_network_from_file(const char* filename) {
     new_nn->hidden_layer = new_uninitialized_matrix(new_nn->hidden_biases->size, default_batch_size);
     new_nn->output_layer = new_uninitialized_matrix(new_nn->output_biases->size, default_batch_size);
 
-    set_activation_functions(new_nn, identity, identity_derivative);
+    set_activation_functions(new_nn, identity, identity_derivative); // default activation functions
+    new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
 
     fclose(file);
 
