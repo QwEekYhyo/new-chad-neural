@@ -90,7 +90,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         if (epoch % 100 == 0) {
             printf("training epoch = %zu", epoch);
             if (!with_history)
-                printf("\n");
+                putchar('\n');
         }
 
         double current_loss = 0;
