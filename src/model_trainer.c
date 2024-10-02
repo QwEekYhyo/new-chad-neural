@@ -67,6 +67,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         return;
     }
 
+    /* This is utter garbage as they might be non zero when uninitialized */
     if (!trainer->learning_rate)
         trainer->learning_rate = 0.01; // default learning_rate
     if (!trainer->epochs)
