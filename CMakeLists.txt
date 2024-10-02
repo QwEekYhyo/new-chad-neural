@@ -4,6 +4,9 @@ project(new_chad_neural LANGUAGES C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
+
 include_directories(include)
 
 if(MSVC)
@@ -12,7 +15,13 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -O3)
 endif()
 
-enable_testing()
-
 add_subdirectory(src)
-add_subdirectory(tests)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
