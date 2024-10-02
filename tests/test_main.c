@@ -38,6 +38,8 @@ double f(double x) {
     return 0.4 * x + 0.2;
 }
 
+ModelTrainer trainer;
+
 int main(void) {
     // Better randomization
 #if defined(_POSIX_VERSION)
@@ -59,11 +61,9 @@ int main(void) {
 
     printf("Init Neural Network...\n");
     NeuralNetwork* nn = new_neural_network(INPUT_SIZE, 3, OUTPUT_SIZE);
-    ModelTrainer trainer;
     trainer.nn = nn;
     trainer.batch_size = 10;
     trainer.epochs = 2000;
-    set_loss_function(&trainer, MSE);
 
     printf("Start training...\n");
     double* loss_history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);
@@ -82,11 +82,6 @@ int main(void) {
                 nn->output_layer->buffer[0][i]
         );
     }
-
-    printf("loss history:\n");
-    for (size_t i = 0; i < trainer.epochs; i++)
-        printf("%f, ", loss_history[i]);
-    putchar('\n');
 
     free(loss_history);
     free_matrix(input);
