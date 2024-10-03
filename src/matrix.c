@@ -27,6 +27,7 @@ Matrix* new_uninitialized_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = malloc(sizeof(Matrix));
     new_matrix->rows = rows;
     new_matrix->columns = columns;
+    new_matrix->_columns = columns;
     new_matrix->buffer = malloc(rows * sizeof(double*));
 
     for (size_t i = 0; i < rows; i++) {
@@ -40,6 +41,7 @@ Matrix* new_zero_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = malloc(sizeof(Matrix));
     new_matrix->rows = rows;
     new_matrix->columns = columns;
+    new_matrix->_columns = columns;
     new_matrix->buffer = malloc(rows * sizeof(double*));
 
     for (size_t i = 0; i < rows; i++) {
@@ -53,6 +55,7 @@ Matrix* new_random_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = malloc(sizeof(Matrix));
     new_matrix->rows = rows;
     new_matrix->columns = columns;
+    new_matrix->_columns = columns;
     new_matrix->buffer = malloc(rows * sizeof(double*));
 
     for (size_t i = 0; i < rows; i++) {
@@ -81,6 +84,24 @@ void print_matrix(Matrix* matrix) {
         }
         printf("]\n");
     }
+}
+
+int set_columns(Matrix* matrix, size_t columns) {
+    matrix->columns = columns;
+
+    if (columns > matrix->_columns) {
+        for (size_t i = 0; i < matrix->rows; i++) {
+            free(matrix->buffer[i]);
+            matrix->buffer[i] = malloc(columns * sizeof(double));
+            if (!matrix->buffer[i]) {
+                printf("Reallocation of Matrix failed, could not allocate\n");
+                return -1;
+            }
+        }
+        matrix->_columns = columns;
+    }
+
+    return 0;
 }
 
 int save_matrix(Matrix* matrix, FILE* file) {

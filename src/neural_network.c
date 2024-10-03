@@ -69,12 +69,8 @@ void set_output_activation_functions(NeuralNetwork* nn, activation_function af, 
 }
 
 void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
-    size_t num_hidden = nn->hidden_layer->rows;
-    size_t num_outputs = nn->output_layer->rows;
-    free_matrix(nn->hidden_layer);
-    free_matrix(nn->output_layer);
-    nn->hidden_layer = new_uninitialized_matrix(num_hidden, batch_size);
-    nn->output_layer = new_uninitialized_matrix(num_outputs, batch_size);
+    set_columns(nn->hidden_layer, batch_size);
+    set_columns(nn->output_layer, batch_size);
 }
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
