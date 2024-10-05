@@ -85,8 +85,8 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     size_t actually_trained = iterations * trainer->batch_size;
     size_t not_trained = dataset_size - actually_trained;
 
-    Matrix* input;
-    Matrix* output;
+    Matrix* input  = new_uninitialized_matrix(input_size,  trainer->batch_size);
+    Matrix* output = new_uninitialized_matrix(output_size, trainer->batch_size);
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
         if (epoch % 100 == 0) {
             printf("training epoch = %zu", epoch);
@@ -99,8 +99,8 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         if (not_trained != 0) {
             // First train separately the small portion of the dataset left out by the iteration division
             set_batch_size(trainer->nn, not_trained);
-            input  = new_uninitialized_matrix(input_size , not_trained);
-            output = new_uninitialized_matrix(output_size , not_trained);
+            set_columns(input, not_trained);
+            set_columns(output, not_trained);
 
             // Fill input & output matrices
             // I feel like filling both matrices at the same time using if statements to check boundaries
@@ -130,15 +130,12 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                 }
             }
             back_propagation(trainer->nn, input, output, trainer->learning_rate);
-
-            free_matrix(input);
-            free_matrix(output);
         }
 
         // Now we take care of the rest (aka normal sized batches)
         set_batch_size(trainer->nn, trainer->batch_size);
-        input  = new_uninitialized_matrix(input_size , trainer->batch_size);
-        output = new_uninitialized_matrix(output_size , trainer->batch_size);
+        set_columns(input, trainer->batch_size);
+        set_columns(output, trainer->batch_size);
         for (size_t iteration = 0; iteration < iterations; iteration++) {
             // Fill input & output matrices
             // I feel like filling both matrices at the same time using if statements to check boundaries
@@ -179,8 +176,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
             if (epoch % 100 == 0)
                 printf(" - loss = %.15f\n", average_loss);
         }
-
-        free_matrix(input);
-        free_matrix(output);
     }
+    free_matrix(input);
+    free_matrix(output);
 }
