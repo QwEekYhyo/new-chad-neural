@@ -42,6 +42,8 @@ typedef struct {
     activation_function output_layer_afd;
 
     loss_function loss_function_derivative;
+    Matrix* output_errors;
+    Matrix* hidden_errors;
 } NeuralNetwork;
 
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);

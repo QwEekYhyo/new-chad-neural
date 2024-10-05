@@ -38,7 +38,10 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
 
     set_hidden_activation_functions(new_nn, identity, identity_derivative); // default activation functions
     set_output_activation_functions(new_nn, identity, identity_derivative);
+
     new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
+    new_nn->output_errors = NULL;
+    new_nn->hidden_errors = NULL;
 
     return new_nn;
 }
@@ -54,6 +57,11 @@ void free_neural_network(NeuralNetwork* nn) {
 
     free_vector(nn->hidden_biases);
     free_vector(nn->output_biases);
+
+    if (nn->output_errors)
+        free_matrix(nn->output_errors);
+    if (nn->hidden_errors)
+        free_matrix(nn->hidden_errors);
 
     free(nn);
 }
@@ -71,6 +79,10 @@ void set_output_activation_functions(NeuralNetwork* nn, activation_function af, 
 void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
     set_columns(nn->hidden_layer, batch_size);
     set_columns(nn->output_layer, batch_size);
+    if (nn->output_errors)
+        set_columns(nn->output_errors, batch_size);
+    if (nn->hidden_errors)
+        set_columns(nn->hidden_errors, batch_size);
 }
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
@@ -118,25 +130,27 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
 // forward_pass needs to be called before this function
 void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double learning_rate) {
     // Calculate output error
-    Matrix* output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
+    if (!nn->output_errors)
+        nn->output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
-            output_errors->buffer[o][b] =
+            nn->output_errors->buffer[o][b] =
                 nn->loss_function_derivative(targets->buffer[o][b], current_output)
                 * nn->output_layer_afd(current_output);
         }
     }
 
     // Calculate hidden layer error
-    Matrix* hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
+    if (!nn->hidden_errors)
+        nn->hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
     for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
         for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
-            hidden_errors->buffer[h][b] = 0;
+            nn->hidden_errors->buffer[h][b] = 0;
             for (size_t j = 0; j < nn->output_layer->rows; j++) {
-                hidden_errors->buffer[h][b] += output_errors->buffer[j][b] * nn->hidden_output_weights->buffer[j][h];
+                nn->hidden_errors->buffer[h][b] += nn->output_errors->buffer[j][b] * nn->hidden_output_weights->buffer[j][h];
             }
-            hidden_errors->buffer[h][b] *= nn->hidden_layer_afd(nn->hidden_layer->buffer[h][b]);
+            nn->hidden_errors->buffer[h][b] *= nn->hidden_layer_afd(nn->hidden_layer->buffer[h][b]);
         }
     }
 
@@ -145,14 +159,14 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
         for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
             double weight_update = 0.0;
             for (size_t b = 0; b < nn->output_layer->columns; b++) {
-                weight_update += output_errors->buffer[o][b] * nn->hidden_layer->buffer[h][b];
+                weight_update += nn->output_errors->buffer[o][b] * nn->hidden_layer->buffer[h][b];
             }
             nn->hidden_output_weights->buffer[o][h] += learning_rate * weight_update / nn->output_layer->columns; // average over batch
         }
         // Update output biases (biases are shared across batch examples, so sum the errors)
         double bias_update = 0.0;
         for (size_t b = 0; b < nn->output_layer->columns; b++) {
-            bias_update += output_errors->buffer[o][b];
+            bias_update += nn->output_errors->buffer[o][b];
         }
         nn->output_biases->buffer[o] += learning_rate * bias_update / nn->output_layer->columns; // average over batch
     }
@@ -163,20 +177,17 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
         for (size_t i = 0; i < nn->input_size; i++) {
             double weight_update = 0.0;
             for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-                weight_update += hidden_errors->buffer[h][b] * inputs->buffer[i][b];
+                weight_update += nn->hidden_errors->buffer[h][b] * inputs->buffer[i][b];
             }
             nn->input_hidden_weights->buffer[h][i] += learning_rate * weight_update / nn->hidden_layer->columns; // average over batch
         }
         // Update hidden biases
         double bias_update = 0.0;
         for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-            bias_update += hidden_errors->buffer[h][b];
+            bias_update += nn->hidden_errors->buffer[h][b];
         }
         nn->hidden_biases->buffer[h] += learning_rate * bias_update / nn->hidden_layer->columns; // average over batch
     }
-
-    free_matrix(output_errors);
-    free_matrix(hidden_errors);
 }
 
 int save_neural_network(NeuralNetwork* nn, const char* filename) {
@@ -226,7 +237,10 @@ NeuralNetwork* new_neural_network_from_file(const char* filename) {
 
     set_hidden_activation_functions(new_nn, identity, identity_derivative); // default activation functions
     set_output_activation_functions(new_nn, identity, identity_derivative);
+
     new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
+    new_nn->output_errors = NULL;
+    new_nn->hidden_errors = NULL;
 
     fclose(file);
 
