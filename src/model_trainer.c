@@ -180,3 +180,98 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     free_matrix(input);
     free_matrix(output);
 }
+
+void train_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size) {
+    _train_vectors(trainer, train_data, train_output, dataset_size, 0, NULL);
+
+}
+
+double* train_with_history_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size) {
+    double* loss_history = malloc(trainer->epochs * sizeof(double));
+    _train_vectors(trainer, train_data, train_output, dataset_size, 1, &loss_history);
+    return loss_history;
+}
+
+void _train_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size, uint_least8_t with_history, double** loss_history) {
+    if (with_history && !loss_history) {
+        printf("Called train with history without providing pointer to store loss history\n");
+        return;
+    }
+
+    /* This is utter garbage as they might be non zero when uninitialized */
+    if (!trainer->learning_rate)
+        trainer->learning_rate = 0.01; // default learning_rate
+    if (!trainer->epochs)
+        trainer->epochs = 100; // default epochs
+    if (!trainer->batch_size)
+        trainer->batch_size = 32; // default batch_size
+    if (with_history && !trainer->loss_function)
+        trainer->loss_function = mean_squared_error; // default loss_function
+
+    size_t output_size = trainer->nn->output_layer->rows;
+
+    size_t iterations = dataset_size / trainer->batch_size;
+    size_t actually_trained = iterations * trainer->batch_size;
+    size_t not_trained = dataset_size - actually_trained;
+
+    for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
+        if (epoch % 100 == 0) {
+            printf("training epoch = %zu", epoch);
+            if (!with_history)
+                putchar('\n');
+        }
+
+        double current_loss = 0;
+        Vector** input = train_data;
+        Vector** output = train_output;
+
+        if (not_trained != 0) {
+            // First train separately the small portion of the dataset left out by the iteration division
+            set_batch_size(trainer->nn, not_trained);
+
+            // Train the small batch
+            forward_pass_vectors(trainer->nn, input + actually_trained, not_trained);
+            if (with_history) {
+                // Add loss
+                for (size_t o = 0; o < not_trained; o++) {
+                    for (size_t i = 0; i < output_size; i++) {
+                        current_loss += trainer->loss_function(
+                                output[o]->buffer[i],
+                                trainer->nn->output_layer->buffer[i][o]
+                        );
+                    }
+                }
+            }
+            back_propagation_vectors(trainer->nn, input + actually_trained, output + actually_trained, not_trained, trainer->learning_rate);
+        }
+
+        // Now we take care of the rest (aka normal sized batches)
+        set_batch_size(trainer->nn, trainer->batch_size);
+        for (size_t iteration = 0; iteration < iterations; iteration++) {
+            // Train batch
+            forward_pass_vectors(trainer->nn, input, trainer->batch_size);
+            if (with_history) {
+                // Add loss
+                for (size_t o = 0; o < trainer->batch_size; o++) {
+                    for (size_t i = 0; i < output_size; i++) {
+                        current_loss += trainer->loss_function(
+                                output[o]->buffer[i],
+                                trainer->nn->output_layer->buffer[i][o]
+                        );
+                    }
+                }
+            }
+            back_propagation_vectors(trainer->nn, input, output, trainer->batch_size, trainer->learning_rate);
+            input += trainer->batch_size;
+            output += trainer->batch_size;
+        }
+
+        if (with_history) {
+            double average_loss = current_loss / (dataset_size * output_size);
+            (*loss_history)[epoch] = average_loss;
+
+            if (epoch % 100 == 0)
+                printf(" - loss = %.15f\n", average_loss);
+        }
+    }
+}
