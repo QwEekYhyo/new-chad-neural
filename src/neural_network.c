@@ -127,6 +127,53 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
     }
 }
 
+void forward_pass_vectors(NeuralNetwork* nn, Vector** inputs, size_t batch_size) {
+    if (!inputs) {
+        printf("No input(s) provided to forward pass\n");
+        return;
+    }
+
+    if ((*inputs)->size != nn->input_size) {
+        printf(
+                "Size of given inputs (%zu) doesn't match number of input nodes in neural network (%zu)\n",
+                (*inputs)->size,
+                nn->input_size
+        );
+        return;
+    }
+
+    if (batch_size != nn->output_layer->columns) {
+        printf(
+                "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
+                batch_size,
+                nn->output_layer->columns
+        );
+        return;
+    }
+
+    // Input to hidden layer
+    for (size_t b = 0; b < batch_size; b++) {
+        for (size_t i = 0; i < nn->hidden_layer->rows; i++) {
+            nn->hidden_layer->buffer[i][b] = nn->hidden_biases->buffer[i];
+            for (size_t j = 0; j < nn->input_size; j++) {
+                nn->hidden_layer->buffer[i][b] += inputs[b]->buffer[j] * nn->input_hidden_weights->buffer[i][j];
+            }
+            nn->hidden_layer->buffer[i][b] = nn->hidden_layer_af(nn->hidden_layer->buffer[i][b]);
+        }
+    }
+
+    // Hidden to output layer
+    for (size_t b = 0; b < batch_size; b++) {
+        for (size_t i = 0; i < nn->output_layer->rows; i++) {
+            nn->output_layer->buffer[i][b] = nn->output_biases->buffer[i];
+            for (size_t j = 0; j < nn->hidden_layer->rows; j++) {
+                nn->output_layer->buffer[i][b] += nn->hidden_layer->buffer[j][b] * nn->hidden_output_weights->buffer[i][j];
+            }
+            nn->output_layer->buffer[i][b] = nn->output_layer_af(nn->output_layer->buffer[i][b]);
+        }
+    }
+}
+
 // forward_pass needs to be called before this function
 void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double learning_rate) {
     // Calculate output error
