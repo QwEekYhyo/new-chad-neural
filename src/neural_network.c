@@ -237,6 +237,77 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     }
 }
 
+void back_propagation_vectors(NeuralNetwork* nn, Vector** inputs, Vector** targets, size_t batch_size, double learning_rate) {
+    if (batch_size != nn->output_layer->columns) {
+        printf(
+                "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
+                batch_size,
+                nn->output_layer->columns
+        );
+        return;
+    }
+
+    // Calculate output error
+    if (!nn->output_errors)
+        nn->output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
+    for (size_t b = 0; b < batch_size; b++) {
+        for (size_t o = 0; o < nn->output_layer->rows; o++) {
+            double current_output = nn->output_layer->buffer[o][b];
+            nn->output_errors->buffer[o][b] =
+                nn->loss_function_derivative(targets[b]->buffer[o], current_output)
+                * nn->output_layer_afd(current_output);
+        }
+    }
+
+    // Calculate hidden layer error
+    if (!nn->hidden_errors)
+        nn->hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
+    for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
+        for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
+            nn->hidden_errors->buffer[h][b] = 0;
+            for (size_t j = 0; j < nn->output_layer->rows; j++) {
+                nn->hidden_errors->buffer[h][b] += nn->output_errors->buffer[j][b] * nn->hidden_output_weights->buffer[j][h];
+            }
+            nn->hidden_errors->buffer[h][b] *= nn->hidden_layer_afd(nn->hidden_layer->buffer[h][b]);
+        }
+    }
+
+    // Update hidden to output weights and output biases
+    for (size_t o = 0; o < nn->output_layer->rows; o++) {
+        for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
+            double weight_update = 0.0;
+            for (size_t b = 0; b < nn->output_layer->columns; b++) {
+                weight_update += nn->output_errors->buffer[o][b] * nn->hidden_layer->buffer[h][b];
+            }
+            nn->hidden_output_weights->buffer[o][h] += learning_rate * weight_update / nn->output_layer->columns; // average over batch
+        }
+        // Update output biases (biases are shared across batch examples, so sum the errors)
+        double bias_update = 0.0;
+        for (size_t b = 0; b < nn->output_layer->columns; b++) {
+            bias_update += nn->output_errors->buffer[o][b];
+        }
+        nn->output_biases->buffer[o] += learning_rate * bias_update / nn->output_layer->columns; // average over batch
+    }
+
+
+    // Update input to hidden weights and hidden biases
+    for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
+        for (size_t i = 0; i < nn->input_size; i++) {
+            double weight_update = 0.0;
+            for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
+                weight_update += nn->hidden_errors->buffer[h][b] * inputs[b]->buffer[i];
+            }
+            nn->input_hidden_weights->buffer[h][i] += learning_rate * weight_update / nn->hidden_layer->columns; // average over batch
+        }
+        // Update hidden biases
+        double bias_update = 0.0;
+        for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
+            bias_update += nn->hidden_errors->buffer[h][b];
+        }
+        nn->hidden_biases->buffer[h] += learning_rate * bias_update / nn->hidden_layer->columns; // average over batch
+    }
+}
+
 int save_neural_network(NeuralNetwork* nn, const char* filename) {
     // No error checking for remove() because:
     // - if the file doesn't exist -> I don't care + ratio
