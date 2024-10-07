@@ -21,6 +21,7 @@
 enum LossFunction {
     MSE, // Mean Squared Error
     BCE, // Binary Cross Entropy
+    CCE, // Categorical Cross Entropy
 };
 
 typedef double (*activation_function)(double);

@@ -45,6 +45,10 @@ int set_loss_function(ModelTrainer* trainer, enum LossFunction loss) {
             trainer->loss_function = binary_cross_entropy;
             trainer->nn->loss_function_derivative = binary_cross_entropy_derivative;
             break;
+        case CCE:
+            trainer->loss_function = categorical_cross_entropy;
+            trainer->nn->loss_function_derivative = categorical_cross_entropy_derivative;
+            break;
     }
 
     return 0;

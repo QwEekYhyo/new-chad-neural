@@ -48,4 +48,7 @@ double mean_squared_error_derivative(double target, double output);
 double binary_cross_entropy(double target, double output);
 double binary_cross_entropy_derivative(double target, double output);
 
+double categorical_cross_entropy(double target, double output);
+double categorical_cross_entropy_derivative(double target, double output);
+
 #endif // NCN_UTILS_H

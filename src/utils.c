@@ -63,3 +63,15 @@ double binary_cross_entropy(double target, double output) {
 double binary_cross_entropy_derivative(double target, double output) {
     return (output - target) / (output * (1 - output));
 }
+
+/* I have actually no clue if the formulas below are correct xd */
+double categorical_cross_entropy(double target, double output) {
+    if (target == 1.0) {
+        return log(output);
+    }
+    return 0;
+}
+
+double categorical_cross_entropy_derivative(double target, double output) {
+    return output - target;
+}
