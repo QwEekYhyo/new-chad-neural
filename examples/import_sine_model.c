@@ -25,8 +25,8 @@
 
 int main(void) {
     NeuralNetwork* nn = new_neural_network_from_file("sine_model.ncn");
-    set_hidden_activation_functions(nn, sigmoid, sigmoid_derivative);
-    set_output_activation_functions(nn, sigmoid, sigmoid_derivative);
+    nn->hidden_layer_af = SIGMOID;
+    nn->output_layer_af = SIGMOID;
 
     Matrix* input = new_uninitialized_matrix(1, BATCH_SIZE);
     set_batch_size(nn, BATCH_SIZE);

@@ -21,6 +21,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <matrix.h>
 
 #define EPSILON 0.000000000000001
 
@@ -35,11 +36,10 @@ inline bool are_double_equals(double a, double b) {
 double rand_double_range(int min, int max);
 
 /***** Activation functions *****/
-double identity(double x);
-double identity_derivative(double x);
-
 double sigmoid(double x);
 double sigmoid_derivative(double x);
+
+void softmax(Matrix* output);
 
 /***** Loss functions *****/
 double mean_squared_error(double target, double output);

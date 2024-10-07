@@ -18,6 +18,12 @@
 #ifndef NCN_COMMON_DEFS_H
 #define NCN_COMMON_DEFS_H
 
+enum ActivationFunction {
+    IDENTITY,
+    SIGMOID,
+    SOFTMAX,
+};
+
 enum LossFunction {
     MSE, // Mean Squared Error
     BCE, // Binary Cross Entropy

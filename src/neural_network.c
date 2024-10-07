@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "matrix.h"
+#include <common_defs.h>
 #include <neural_network.h>
 #include <utils.h>
 
@@ -36,8 +36,8 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
     new_nn->hidden_biases = new_random_vector(num_hidden);
     new_nn->output_biases = new_random_vector(num_outputs);
 
-    set_hidden_activation_functions(new_nn, identity, identity_derivative); // default activation functions
-    set_output_activation_functions(new_nn, identity, identity_derivative);
+    new_nn->hidden_layer_af = IDENTITY; // default activation functions
+    new_nn->output_layer_af = IDENTITY;
 
     new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
     new_nn->output_errors = NULL;
@@ -64,16 +64,6 @@ void free_neural_network(NeuralNetwork* nn) {
         free_matrix(nn->hidden_errors);
 
     free(nn);
-}
-
-void set_hidden_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf) {
-    nn->hidden_layer_af = af;
-    nn->hidden_layer_afd = daf;
-}
-
-void set_output_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf) {
-    nn->output_layer_af = af;
-    nn->output_layer_afd = daf;
 }
 
 void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
@@ -111,7 +101,17 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
             for (size_t j = 0; j < nn->input_size; j++) {
                 nn->hidden_layer->buffer[i][b] += inputs->buffer[j][b] * nn->input_hidden_weights->buffer[i][j];
             }
-            nn->hidden_layer->buffer[i][b] = nn->hidden_layer_af(nn->hidden_layer->buffer[i][b]);
+            // Apply activation function
+            switch (nn->hidden_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    nn->hidden_layer->buffer[i][b] = sigmoid(nn->hidden_layer->buffer[i][b]);
+                    break;
+                case SOFTMAX:
+                    printf("Softmax for hidden layer isn't done\n");
+                    break;
+            }
         }
     }
 
@@ -122,9 +122,21 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
             for (size_t j = 0; j < nn->hidden_layer->rows; j++) {
                 nn->output_layer->buffer[i][b] += nn->hidden_layer->buffer[j][b] * nn->hidden_output_weights->buffer[i][j];
             }
-            nn->output_layer->buffer[i][b] = nn->output_layer_af(nn->output_layer->buffer[i][b]);
+            // Apply activation function
+            switch (nn->output_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    nn->output_layer->buffer[i][b] = sigmoid(nn->output_layer->buffer[i][b]);
+                    break;
+                case SOFTMAX:
+                    // Special case, it is done afterwards
+                    break;
+            }
         }
     }
+    if (nn->output_layer_af == SOFTMAX)
+        softmax(nn->output_layer);
 }
 
 /* param inputs is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns) */
@@ -150,7 +162,17 @@ void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size) {
             for (size_t j = 0; j < nn->input_size; j++) {
                 nn->hidden_layer->buffer[i][b] += inputs[b * nn->input_size + j] * nn->input_hidden_weights->buffer[i][j];
             }
-            nn->hidden_layer->buffer[i][b] = nn->hidden_layer_af(nn->hidden_layer->buffer[i][b]);
+            // Apply activation function
+            switch (nn->hidden_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    nn->hidden_layer->buffer[i][b] = sigmoid(nn->hidden_layer->buffer[i][b]);
+                    break;
+                case SOFTMAX:
+                    printf("Softmax for hidden layer isn't done\n");
+                    break;
+            }
         }
     }
 
@@ -161,9 +183,21 @@ void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size) {
             for (size_t j = 0; j < nn->hidden_layer->rows; j++) {
                 nn->output_layer->buffer[i][b] += nn->hidden_layer->buffer[j][b] * nn->hidden_output_weights->buffer[i][j];
             }
-            nn->output_layer->buffer[i][b] = nn->output_layer_af(nn->output_layer->buffer[i][b]);
+            // Apply activation function
+            switch (nn->output_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    nn->output_layer->buffer[i][b] = sigmoid(nn->output_layer->buffer[i][b]);
+                    break;
+                case SOFTMAX:
+                    // Special case, it is done afterwards
+                    break;
+            }
         }
     }
+    if (nn->output_layer_af == SOFTMAX)
+        softmax(nn->output_layer);
 }
 
 // forward_pass needs to be called before this function
@@ -174,9 +208,21 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
+            double activation_function_derivative = 1;
+            switch (nn->output_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    activation_function_derivative = sigmoid_derivative(current_output);
+                    break;
+                case SOFTMAX:
+                    // This is taken care of by using categorical cross entropy loss function
+                    // source: Trust me bro
+                    break;
+            }
             nn->output_errors->buffer[o][b] =
                 nn->loss_function_derivative(targets->buffer[o][b], current_output)
-                * nn->output_layer_afd(current_output);
+                * activation_function_derivative;
         }
     }
 
@@ -189,7 +235,18 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
             for (size_t j = 0; j < nn->output_layer->rows; j++) {
                 nn->hidden_errors->buffer[h][b] += nn->output_errors->buffer[j][b] * nn->hidden_output_weights->buffer[j][h];
             }
-            nn->hidden_errors->buffer[h][b] *= nn->hidden_layer_afd(nn->hidden_layer->buffer[h][b]);
+            double activation_function_derivative = 1;
+            switch (nn->hidden_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    activation_function_derivative = sigmoid_derivative(nn->hidden_layer->buffer[h][b]);
+                    break;
+                case SOFTMAX:
+                    printf("Softmax for hidden layer isn't done\n");
+                    break;
+            }
+            nn->hidden_errors->buffer[h][b] *= activation_function_derivative;
         }
     }
 
@@ -247,9 +304,21 @@ void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, s
     for (size_t b = 0; b < batch_size; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
+            double activation_function_derivative = 1;
+            switch (nn->output_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    activation_function_derivative = sigmoid_derivative(current_output);
+                    break;
+                case SOFTMAX:
+                    // This is taken care of by using categorical cross entropy loss function
+                    // source: Trust me bro
+                    break;
+            }
             nn->output_errors->buffer[o][b] =
                 nn->loss_function_derivative(targets[b * nn->output_layer->rows + o], current_output)
-                * nn->output_layer_afd(current_output);
+                * activation_function_derivative;
         }
     }
 
@@ -262,7 +331,18 @@ void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, s
             for (size_t j = 0; j < nn->output_layer->rows; j++) {
                 nn->hidden_errors->buffer[h][b] += nn->output_errors->buffer[j][b] * nn->hidden_output_weights->buffer[j][h];
             }
-            nn->hidden_errors->buffer[h][b] *= nn->hidden_layer_afd(nn->hidden_layer->buffer[h][b]);
+            double activation_function_derivative = 1;
+            switch (nn->hidden_layer_af) {
+                case IDENTITY:
+                    break;
+                case SIGMOID:
+                    activation_function_derivative = sigmoid_derivative(nn->hidden_layer->buffer[h][b]);
+                    break;
+                case SOFTMAX:
+                    printf("Softmax for hidden layer isn't done\n");
+                    break;
+            }
+            nn->hidden_errors->buffer[h][b] *= activation_function_derivative;
         }
     }
 
@@ -347,8 +427,8 @@ NeuralNetwork* new_neural_network_from_file(const char* filename) {
     new_nn->hidden_layer = new_uninitialized_matrix(new_nn->hidden_biases->size, default_batch_size);
     new_nn->output_layer = new_uninitialized_matrix(new_nn->output_biases->size, default_batch_size);
 
-    set_hidden_activation_functions(new_nn, identity, identity_derivative); // default activation functions
-    set_output_activation_functions(new_nn, identity, identity_derivative);
+    new_nn->hidden_layer_af = IDENTITY; // default activation functions
+    new_nn->output_layer_af = IDENTITY;
 
     new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
     new_nn->output_errors = NULL;

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <common_defs.h>
 #include <neural_network.h>
 #include <utils.h>
 #include <model_trainer.h>
@@ -44,8 +45,8 @@ int main(void) {
     }
 
     NeuralNetwork* nn = new_neural_network(INPUT_SIZE, 10, OUTPUT_SIZE);
-    set_hidden_activation_functions(nn, sigmoid, sigmoid_derivative);
-    set_output_activation_functions(nn, sigmoid, sigmoid_derivative);
+    nn->hidden_layer_af = SIGMOID;
+    nn->output_layer_af = SIGMOID;
     trainer.nn = nn;
     trainer.learning_rate = 0.8;
     trainer.batch_size = 10;

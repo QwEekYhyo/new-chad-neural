@@ -35,11 +35,8 @@ typedef struct {
     Vector* hidden_biases;
     Vector* output_biases;
 
-    activation_function hidden_layer_af; // Activation function of hidden layer
-    activation_function hidden_layer_afd;
-
-    activation_function output_layer_af; // Activation function of output layer
-    activation_function output_layer_afd;
+    enum ActivationFunction hidden_layer_af; // Activation function of hidden layer
+    enum ActivationFunction output_layer_af; // Activation function of output layer
 
     loss_function loss_function_derivative;
     Matrix* output_errors;
@@ -49,8 +46,6 @@ typedef struct {
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);
 void free_neural_network(NeuralNetwork* nn);
 
-void set_hidden_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
-void set_output_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs);
