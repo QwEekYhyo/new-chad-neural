@@ -51,7 +51,7 @@ int main(void) {
     trainer.batch_size = 10;
     trainer.epochs = 10000;
 
-    double* history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);
+    double* history = train_with_history_bare(&trainer, data[0], output_data[0], DATASET_SIZE);
 
     save_neural_network(nn, "sine_model.ncn");
 
