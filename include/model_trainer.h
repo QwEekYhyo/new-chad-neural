@@ -47,9 +47,9 @@ double* train_with_history(ModelTrainer* trainer, double* train_data, double* tr
  * as no allocation occurs in these functions except for the loss history
  * => dataset is only allocated once and not "twice" like the functions above
  */
-void _train_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size, uint_least8_t with_history, double** loss_history);
+void _train_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size, uint_least8_t with_history, double** loss_history);
 
-void train_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size);
-double* train_with_history_vectors(ModelTrainer* trainer, Vector** train_data, Vector** train_output, size_t dataset_size);
+void train_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
+double* train_with_history_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
 
 #endif // NCN_MODEL_TRAINER_H

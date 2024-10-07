@@ -127,18 +127,10 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
     }
 }
 
-void forward_pass_vectors(NeuralNetwork* nn, Vector** inputs, size_t batch_size) {
+/* param inputs is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns) */
+void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size) {
     if (!inputs) {
         printf("No input(s) provided to forward pass\n");
-        return;
-    }
-
-    if ((*inputs)->size != nn->input_size) {
-        printf(
-                "Size of given inputs (%zu) doesn't match number of input nodes in neural network (%zu)\n",
-                (*inputs)->size,
-                nn->input_size
-        );
         return;
     }
 
@@ -156,7 +148,7 @@ void forward_pass_vectors(NeuralNetwork* nn, Vector** inputs, size_t batch_size)
         for (size_t i = 0; i < nn->hidden_layer->rows; i++) {
             nn->hidden_layer->buffer[i][b] = nn->hidden_biases->buffer[i];
             for (size_t j = 0; j < nn->input_size; j++) {
-                nn->hidden_layer->buffer[i][b] += inputs[b]->buffer[j] * nn->input_hidden_weights->buffer[i][j];
+                nn->hidden_layer->buffer[i][b] += inputs[b * nn->input_size + j] * nn->input_hidden_weights->buffer[i][j];
             }
             nn->hidden_layer->buffer[i][b] = nn->hidden_layer_af(nn->hidden_layer->buffer[i][b]);
         }
@@ -237,7 +229,9 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     }
 }
 
-void back_propagation_vectors(NeuralNetwork* nn, Vector** inputs, Vector** targets, size_t batch_size, double learning_rate) {
+/* param inputs  is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns) */
+/* param targets is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_output_nodes columns) */
+void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, size_t batch_size, double learning_rate) {
     if (batch_size != nn->output_layer->columns) {
         printf(
                 "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
@@ -254,7 +248,7 @@ void back_propagation_vectors(NeuralNetwork* nn, Vector** inputs, Vector** targe
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
             nn->output_errors->buffer[o][b] =
-                nn->loss_function_derivative(targets[b]->buffer[o], current_output)
+                nn->loss_function_derivative(targets[b * nn->output_layer->rows + o], current_output)
                 * nn->output_layer_afd(current_output);
         }
     }
@@ -295,7 +289,7 @@ void back_propagation_vectors(NeuralNetwork* nn, Vector** inputs, Vector** targe
         for (size_t i = 0; i < nn->input_size; i++) {
             double weight_update = 0.0;
             for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-                weight_update += nn->hidden_errors->buffer[h][b] * inputs[b]->buffer[i];
+                weight_update += nn->hidden_errors->buffer[h][b] * inputs[b * nn->input_size + i];
             }
             nn->input_hidden_weights->buffer[h][i] += learning_rate * weight_update / nn->hidden_layer->columns; // average over batch
         }
