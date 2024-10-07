@@ -29,14 +29,6 @@ double rand_double_range(int min, int max) {
     return min + scale * (max - min);
 }
 
-double identity(double x) {
-    return x;
-}
-
-double identity_derivative(double x) {
-    return 1;
-}
-
 double sigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
 }
@@ -46,4 +38,47 @@ double sigmoid(double x) {
 // Basically here we assume that x = sigmoid(y)
 double sigmoid_derivative(double x) {
     return x * (1 - x);
+}
+
+void softmax(Matrix* output) {
+    for (size_t b = 0; b < output->columns; b++) {
+        double sum = 0.0;
+
+        for (size_t r = 0; r < output->rows; r++) {
+            output->buffer[r][b] = exp(output->buffer[r][b]);
+            sum += output->buffer[r][b];
+        }
+
+        for (size_t r = 0; r < output->rows; r++) {
+            output->buffer[r][b] /= sum;
+        }
+    }
+}
+
+double mean_squared_error(double target, double output) {
+    return (target - output) * (target - output);
+}
+
+double mean_squared_error_derivative(double target, double output) {
+    return target - output;
+}
+
+double binary_cross_entropy(double target, double output) {
+    return - (target * log(output) + (1 - target) * log(1 - output));
+}
+
+double binary_cross_entropy_derivative(double target, double output) {
+    return (output - target) / (output * (1 - output));
+}
+
+/* I have actually no clue if the formulas below are correct xd */
+double categorical_cross_entropy(double target, double output) {
+    if (target == 1.0) {
+        return log(output);
+    }
+    return 0;
+}
+
+double categorical_cross_entropy_derivative(double target, double output) {
+    return output - target;
 }

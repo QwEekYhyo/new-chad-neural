@@ -19,6 +19,7 @@
 #define NCN_MODEL_TRAINER_H
 
 #include <neural_network.h>
+#include <common_defs.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -29,7 +30,11 @@ typedef struct {
     double learning_rate;
     size_t epochs;
     size_t batch_size;
+
+    loss_function loss_function;
 } ModelTrainer;
+
+int set_loss_function(ModelTrainer* trainer, enum LossFunction loss);
 
 // train_data & train_output HAVE to be sized just like the neural network input & output
 // or else consequences
@@ -37,5 +42,14 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
 
 void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
 double* train_with_history(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
+
+/* This is recommended for large datasets with a lot of input and/or output nodes,
+ * as no allocation occurs in these functions except for the loss history
+ * => dataset is only allocated once and not "twice" like the functions above
+ */
+void _train_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size, uint_least8_t with_history, double** loss_history);
+
+void train_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
+double* train_with_history_bare(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size);
 
 #endif // NCN_MODEL_TRAINER_H

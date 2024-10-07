@@ -35,18 +35,27 @@ typedef struct {
     Vector* hidden_biases;
     Vector* output_biases;
 
-    activation_function activation_function;
-    activation_function activation_function_derivative;
+    enum ActivationFunction hidden_layer_af; // Activation function of hidden layer
+    enum ActivationFunction output_layer_af; // Activation function of output layer
+
+    loss_function loss_function_derivative;
+    Matrix* output_errors;
+    Matrix* hidden_errors;
 } NeuralNetwork;
 
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);
 void free_neural_network(NeuralNetwork* nn);
 
-void set_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs);
 void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
+
+/* You still need to set batch_size correctly obviously
+ * param batch_size is a redundancy
+ */
+void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size);
+void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* expected_outputs, size_t batch_size, double learning_rate);
 
 int save_neural_network(NeuralNetwork* nn, const char* filename);
 NeuralNetwork* new_neural_network_from_file(const char* filename);
