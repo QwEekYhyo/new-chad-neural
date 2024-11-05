@@ -16,8 +16,8 @@
  */
 
 #include <common_defs.h>
+#include <functions.h>
 #include <neural_network.h>
-#include <utils.h>
 
 #include <stdlib.h>
 #include <stdio.h>

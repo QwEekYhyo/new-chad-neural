@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <model_trainer.h>
+
+#include <functions.h>
 #include <matrix.h>
 #include <neural_network.h>
-#include <model_trainer.h>
 #include <utils.h>
 
 #include <stdio.h>

@@ -15,23 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef NCN_UTILS_H
-#define NCN_UTILS_H
+#ifndef NCN_FUNCTIONS_H
+#define NCN_FUNCTIONS_H
 
-#include <math.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <matrix.h>
 
-#define EPSILON 0.000000000000001
+/***** Activation functions *****/
+double sigmoid(double x);
+double sigmoid_derivative(double x);
 
-inline size_t max(size_t a, size_t b) {
-    return a >= b ? a : b;
-}
+void softmax(Matrix* output);
 
-inline bool are_double_equals(double a, double b) {
-    return fabs(a - b) < EPSILON;
-}
+/***** Loss functions *****/
+double mean_squared_error(double target, double output);
+double mean_squared_error_derivative(double target, double output);
 
-double rand_double_range(int min, int max);
+double binary_cross_entropy(double target, double output);
+double binary_cross_entropy_derivative(double target, double output);
 
-#endif // NCN_UTILS_H
+double categorical_cross_entropy(double target, double output);
+double categorical_cross_entropy_derivative(double target, double output);
+
+#endif // NCN_FUNCTIONS_H
