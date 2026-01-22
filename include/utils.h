@@ -33,5 +33,7 @@ inline bool are_double_equals(double a, double b) {
 }
 
 double rand_double_range(int min, int max);
+double rand_uniform(void);
+void   rand_normal(double mean, double stddev, double* z0, double* z1);
 
 #endif // NCN_UTILS_H

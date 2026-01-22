@@ -56,7 +56,7 @@ int set_loss_function(ModelTrainer* trainer, enum LossFunction loss) {
     return 0;
 }
 
-// train_data and train_output should oviously be the same size (dataset_size)
+// train_data and train_output should obviously be the same size (dataset_size)
 void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
     _train(trainer, train_data, train_output, dataset_size, 0, NULL);
 }
@@ -73,7 +73,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         return;
     }
 
-    /* This is utter garbage as they might be non zero when uninitialized */
+    /* This is utter garbage as they might be non-zero when uninitialized */
     if (!trainer->learning_rate)
         trainer->learning_rate = 0.01; // default learning_rate
     if (!trainer->epochs)
@@ -94,7 +94,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     Matrix* input  = new_uninitialized_matrix(input_size,  trainer->batch_size);
     Matrix* output = new_uninitialized_matrix(output_size, trainer->batch_size);
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
-        if (epoch % 100 == 0) {
+        if (epoch % 1 == 0) {
             printf("training epoch = %zu", epoch);
             if (!with_history)
                 putchar('\n');
@@ -204,7 +204,7 @@ void _train_bare(ModelTrainer* trainer, double* train_data, double* train_output
         return;
     }
 
-    /* This is utter garbage as they might be non zero when uninitialized */
+    /* This is utter garbage as they might be non-zero when uninitialized */
     if (!trainer->learning_rate)
         trainer->learning_rate = 0.01; // default learning_rate
     if (!trainer->epochs)

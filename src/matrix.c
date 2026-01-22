@@ -24,11 +24,7 @@
 #include <stdlib.h>
 
 Matrix* new_uninitialized_matrix(size_t rows, size_t columns) {
-    Matrix* new_matrix = malloc(sizeof(Matrix));
-    new_matrix->rows = rows;
-    new_matrix->columns = columns;
-    new_matrix->_columns = columns;
-    new_matrix->buffer = malloc(rows * sizeof(double*));
+    Matrix* new_matrix = _allocate_matrix(rows, columns);
 
     for (size_t i = 0; i < rows; i++) {
         new_matrix->buffer[i] = malloc(columns * sizeof(double));
@@ -38,11 +34,7 @@ Matrix* new_uninitialized_matrix(size_t rows, size_t columns) {
 }
 
 Matrix* new_zero_matrix(size_t rows, size_t columns) {
-    Matrix* new_matrix = malloc(sizeof(Matrix));
-    new_matrix->rows = rows;
-    new_matrix->columns = columns;
-    new_matrix->_columns = columns;
-    new_matrix->buffer = malloc(rows * sizeof(double*));
+    Matrix* new_matrix = _allocate_matrix(rows, columns);
 
     for (size_t i = 0; i < rows; i++) {
         new_matrix->buffer[i] = calloc(columns, sizeof(double));
@@ -52,11 +44,7 @@ Matrix* new_zero_matrix(size_t rows, size_t columns) {
 }
 
 Matrix* new_random_matrix(size_t rows, size_t columns) {
-    Matrix* new_matrix = malloc(sizeof(Matrix));
-    new_matrix->rows = rows;
-    new_matrix->columns = columns;
-    new_matrix->_columns = columns;
-    new_matrix->buffer = malloc(rows * sizeof(double*));
+    Matrix* new_matrix = _allocate_matrix(rows, columns);
 
     for (size_t i = 0; i < rows; i++) {
         new_matrix->buffer[i] = malloc(columns * sizeof(double));
@@ -65,6 +53,38 @@ Matrix* new_random_matrix(size_t rows, size_t columns) {
         }
     }
 
+    return new_matrix;
+}
+
+// Normal Xavier initialization
+// The filling algorithm is kinda trash but it will get better when I flatten the matrix buffer
+Matrix* new_glorot_normal_matrix(size_t rows, size_t columns) {
+    Matrix* new_matrix = _allocate_matrix(rows, columns);
+
+    double stddev = sqrt(2.0 / (columns + rows));
+    double a;
+    double b;
+    size_t iteration_counter = 0;
+    for (size_t i = 0; i < rows; i++) {
+        new_matrix->buffer[i] = malloc(columns * sizeof(double));
+        for (size_t j = 0; j < columns; j++, iteration_counter++) {
+            if (iteration_counter % 2 == 0) {
+                rand_normal(0.0, stddev, &a, &b);
+                new_matrix->buffer[i][j] = a;
+            } else
+                new_matrix->buffer[i][j] = b;
+        }
+    }
+
+    return new_matrix;
+}
+
+Matrix* _allocate_matrix(size_t rows, size_t columns) {
+    Matrix* new_matrix = malloc(sizeof(Matrix));
+    new_matrix->rows = rows;
+    new_matrix->columns = columns;
+    new_matrix->_columns = columns;
+    new_matrix->buffer = malloc(rows * sizeof(double*));
     return new_matrix;
 }
 

@@ -2,6 +2,7 @@ build/
 .cache/
 .vs/
 .vscode/
+.idea/
 
 *.ncn
 !tests/test_vector.ncn
