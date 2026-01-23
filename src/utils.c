@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
 #include <utils.h>
 
 #include <stdlib.h>
