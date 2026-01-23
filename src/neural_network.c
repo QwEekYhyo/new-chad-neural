@@ -205,6 +205,7 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     // Calculate output error
     if (!nn->output_errors)
         nn->output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
+
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
@@ -229,6 +230,7 @@ void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double
     // Calculate hidden layer error
     if (!nn->hidden_errors)
         nn->hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
+
     for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
         for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
             nn->hidden_errors->buffer[h][b] = 0;
@@ -301,6 +303,7 @@ void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, s
     // Calculate output error
     if (!nn->output_errors)
         nn->output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
+
     for (size_t b = 0; b < batch_size; b++) {
         for (size_t o = 0; o < nn->output_layer->rows; o++) {
             double current_output = nn->output_layer->buffer[o][b];
@@ -325,6 +328,7 @@ void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, s
     // Calculate hidden layer error
     if (!nn->hidden_errors)
         nn->hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
+
     for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
         for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
             nn->hidden_errors->buffer[h][b] = 0;

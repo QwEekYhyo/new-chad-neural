@@ -94,7 +94,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     Matrix* input  = new_uninitialized_matrix(input_size,  trainer->batch_size);
     Matrix* output = new_uninitialized_matrix(output_size, trainer->batch_size);
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
-        if (epoch % 1 == 0) {
+        if (epoch % 100 == 0) {
             printf("training epoch = %zu", epoch);
             if (!with_history)
                 putchar('\n');
