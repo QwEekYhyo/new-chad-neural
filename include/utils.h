@@ -24,11 +24,11 @@
 
 #define EPSILON 0.000000000000001
 
-inline size_t max(size_t a, size_t b) {
+static inline size_t max(size_t a, size_t b) {
     return a >= b ? a : b;
 }
 
-inline bool are_double_equals(double a, double b) {
+static inline bool are_double_equals(double a, double b) {
     return fabs(a - b) < EPSILON;
 }
 
