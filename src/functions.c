@@ -32,20 +32,20 @@ double sigmoid_derivative(double x) {
 
 void softmax(Matrix* output) {
     for (size_t b = 0; b < output->columns; b++) {
-        double max_val = output->buffer[0][b];
+        double max_val = MAT(output, 0, b);
         for (size_t r = 1; r < output->rows; r++) {
-            if (output->buffer[r][b] > max_val)
-                max_val = output->buffer[r][b];
+            if (MAT(output, r, b) > max_val)
+                max_val = MAT(output, r, b);
         }
 
         double sum = 0.0;
         for (size_t r = 0; r < output->rows; r++) {
-            output->buffer[r][b] = exp(output->buffer[r][b] - max_val);
-            sum += output->buffer[r][b];
+            MAT(output, r, b) = exp(MAT(output, r, b) - max_val);
+            sum += MAT(output, r, b);
         }
 
         for (size_t r = 0; r < output->rows; r++) {
-            output->buffer[r][b] /= sum;
+            MAT(output, r, b) /= sum;
         }
     }
 }

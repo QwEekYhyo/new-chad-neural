@@ -25,8 +25,10 @@ typedef struct {
     size_t rows;
     size_t columns; // number of used columns
     size_t _columns; // number of actually allocated columns
-    double** buffer;
+    double* buffer;
 } Matrix;
+
+#define MAT(m, row, col) ((m)->buffer[(row) * (m)->_columns + (col)])
 
 Matrix* new_uninitialized_matrix(size_t rows, size_t columns);
 Matrix* new_zero_matrix(size_t rows, size_t columns);

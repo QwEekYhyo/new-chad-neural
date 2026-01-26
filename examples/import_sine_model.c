@@ -35,13 +35,13 @@ int main(void) {
 
     for (size_t i = 0; i < 100; i++) {
         for (size_t b = 0; b < BATCH_SIZE; b++) {
-            input->buffer[0][b] = (i * BATCH_SIZE + b) / (100.0 * BATCH_SIZE);
+            MAT(input, 0, b) = (i * BATCH_SIZE + b) / (100.0 * BATCH_SIZE);
         }
         forward_pass(nn, input);
         for (size_t b = 0; b < BATCH_SIZE; b++) {
             fprintf(gnuplot, "%f %f\n",
-                    input->buffer[0][b] * 20,
-                    nn->output_layer->buffer[0][b] * 2 - 1
+                    MAT(input, 0, b) * 20,
+                    MAT(nn->output_layer, 0, b) * 2 - 1
             );
         }
     }

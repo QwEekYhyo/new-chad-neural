@@ -70,16 +70,16 @@ int main(void) {
 
     printf("testing training results:\n");
     Matrix* input = new_uninitialized_matrix(1, 3);
-    input->buffer[0][0] = 0.102;
-    input->buffer[0][1] = 0.59;
-    input->buffer[0][2] = 0.73;
+    MAT(input, 0, 0) = 0.102;
+    MAT(input, 0, 1) = 0.59;
+    MAT(input, 0, 2) = 0.73;
     set_batch_size(nn, 3);
     forward_pass(nn, input);
     for (size_t i = 0; i < 3; i++) {
         printf("x = %f, f(x) = %f, model predicted : %f\n",
-                input->buffer[0][i],
-                f(input->buffer[0][i]),
-                nn->output_layer->buffer[0][i]
+                MAT(input, 0, i),
+                f(MAT(input, 0, i)),
+                MAT(nn->output_layer, 0, i)
         );
     }
 

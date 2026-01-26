@@ -46,8 +46,8 @@ int main(void) {
 
     for (size_t r = 0; r < 4; r++) {
         for (size_t c = 0; c < 3; c++) {
-            if (!are_double_equals(m->buffer[r][c], 6.9)) {
-                printf("Loaded matrix doesn't have the right value: %lf\n", m->buffer[r][c]);
+            if (!are_double_equals(MAT(m, r, c), 6.9)) {
+                printf("Loaded matrix doesn't have the right value: %lf\n", MAT(m, r, c));
                 return 1;
             }
         }
@@ -73,8 +73,8 @@ int main(void) {
 
     for (size_t r = 0; r < 2; r++) {
         for (size_t c = 0; c < 4; c++) {
-            if (!are_double_equals(m->buffer[r][c], 1.0)) {
-                printf("Loaded matrix doesn't have the right value: %lf\n", m->buffer[r][c]);
+            if (!are_double_equals(MAT(m, r, c), 1.0)) {
+                printf("Loaded matrix doesn't have the right value: %lf\n", MAT(m, r, c));
                 return 1;
             }
         }

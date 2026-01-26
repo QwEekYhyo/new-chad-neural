@@ -114,10 +114,10 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
             for (size_t data_index = 0; data_index < not_trained; data_index++) {
                 for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
                     if (vector_index < input_size)
-                        input->buffer[vector_index][data_index] =
+                        MAT(input, vector_index, data_index) =
                             train_data[(actually_trained + data_index) * input_size + vector_index];
                     if (vector_index < output_size)
-                        output->buffer[vector_index][data_index] =
+                        MAT(output, vector_index, data_index) =
                             train_output[(actually_trained + data_index) * output_size + vector_index];
                 }
             }
@@ -129,8 +129,8 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                 for (size_t o = 0; o < not_trained; o++) {
                     for (size_t i = 0; i < output_size; i++) {
                         current_loss += trainer->loss_function(
-                                output->buffer[i][o],
-                                trainer->nn->output_layer->buffer[i][o]
+                                MAT(output, i, o),
+                                MAT(trainer->nn->output_layer, i, o)
                         );
                     }
                 }
@@ -151,10 +151,10 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                     size_t dataset_index = iteration * trainer->batch_size + data_index;
 
                     if (vector_index < input_size)
-                        input->buffer[vector_index][data_index] =
+                        MAT(input, vector_index, data_index) =
                             train_data[dataset_index * input_size + vector_index];
                     if (vector_index < output_size)
-                        output->buffer[vector_index][data_index] =
+                        MAT(output, vector_index, data_index) =
                             train_output[dataset_index * output_size + vector_index];
                 }
             }
@@ -166,8 +166,8 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                 for (size_t o = 0; o < trainer->batch_size; o++) {
                     for (size_t i = 0; i < output_size; i++) {
                         current_loss += trainer->loss_function(
-                                output->buffer[i][o],
-                                trainer->nn->output_layer->buffer[i][o]
+                                MAT(output, i, o),
+                                MAT(trainer->nn->output_layer, i, o)
                         );
                     }
                 }
@@ -243,7 +243,7 @@ void _train_bare(ModelTrainer* trainer, double* train_data, double* train_output
                     for (size_t i = 0; i < output_size; i++) {
                         current_loss += trainer->loss_function(
                                 output[o * output_size + i],
-                                trainer->nn->output_layer->buffer[i][o]
+                                MAT(trainer->nn->output_layer, i, o)
                         );
                     }
                 }
@@ -262,7 +262,7 @@ void _train_bare(ModelTrainer* trainer, double* train_data, double* train_output
                     for (size_t i = 0; i < output_size; i++) {
                         current_loss += trainer->loss_function(
                                 output[o * output_size + i],
-                                trainer->nn->output_layer->buffer[i][o]
+                                MAT(trainer->nn->output_layer, i, o)
                         );
                     }
                 }
