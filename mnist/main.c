@@ -168,7 +168,7 @@ int main(void) {
     trainer.epochs = 320;
     set_loss_function(&trainer, CCE);
 
-    double* history = train_with_history_bare(&trainer, images, (double*) labels, 6000);
+    double* history = train_with_history(&trainer, images, (double*) labels, 1000);
 
     set_batch_size(nn, 1);
 
