@@ -49,13 +49,12 @@ void free_neural_network(NeuralNetwork* nn);
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
 void forward_pass(NeuralNetwork* nn, Matrix* inputs);
-void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
+void back_propagation(NeuralNetwork* nn, double* inputs, double* expected_outputs, size_t batch_size, double learning_rate);
 
 /* You still need to set batch_size correctly obviously
  * param batch_size is a redundancy
  */
 void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size);
-void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* expected_outputs, size_t batch_size, double learning_rate);
 
 int save_neural_network(NeuralNetwork* nn, const char* filename);
 NeuralNetwork* new_neural_network_from_file(const char* filename);

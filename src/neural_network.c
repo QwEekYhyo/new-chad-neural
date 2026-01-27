@@ -201,96 +201,9 @@ void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size) {
 }
 
 // forward_pass needs to be called before this function
-void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* targets, double learning_rate) {
-    // Calculate output error
-    if (!nn->output_errors)
-        nn->output_errors = new_uninitialized_matrix(nn->output_layer->rows, nn->output_layer->columns);
-
-    for (size_t b = 0; b < nn->output_layer->columns; b++) {
-        for (size_t o = 0; o < nn->output_layer->rows; o++) {
-            double current_output = MAT(nn->output_layer, o, b);
-            double activation_function_derivative = 1;
-            switch (nn->output_layer_af) {
-                case IDENTITY:
-                    break;
-                case SIGMOID:
-                    activation_function_derivative = sigmoid_derivative(current_output);
-                    break;
-                case SOFTMAX:
-                    // This is taken care of by using categorical cross entropy loss function
-                    // source: Trust me bro
-                    break;
-            }
-            MAT(nn->output_errors, o, b) =
-                nn->loss_function_derivative(MAT(targets, o, b), current_output)
-                * activation_function_derivative;
-        }
-    }
-
-    // Calculate hidden layer error
-    if (!nn->hidden_errors)
-        nn->hidden_errors = new_uninitialized_matrix(nn->hidden_layer->rows, nn->hidden_layer->columns);
-
-    for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-        for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
-            MAT(nn->hidden_errors, h, b) = 0;
-            for (size_t j = 0; j < nn->output_layer->rows; j++) {
-                MAT(nn->hidden_errors, h, b) += MAT(nn->output_errors, j, b) * MAT(nn->hidden_output_weights, j, h);
-            }
-            double activation_function_derivative = 1;
-            switch (nn->hidden_layer_af) {
-                case IDENTITY:
-                    break;
-                case SIGMOID:
-                    activation_function_derivative = sigmoid_derivative(MAT(nn->hidden_layer, h, b));
-                    break;
-                case SOFTMAX:
-                    printf("Softmax for hidden layer isn't done\n");
-                    break;
-            }
-            MAT(nn->hidden_errors, h, b) *= activation_function_derivative;
-        }
-    }
-
-    // Update hidden to output weights and output biases
-    for (size_t o = 0; o < nn->output_layer->rows; o++) {
-        for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
-            double weight_update = 0.0;
-            for (size_t b = 0; b < nn->output_layer->columns; b++) {
-                weight_update += MAT(nn->output_errors, o, b) * MAT(nn->hidden_layer, h, b);
-            }
-            MAT(nn->hidden_output_weights, o, h) -= learning_rate * weight_update / nn->output_layer->columns; // average over batch
-        }
-        // Update output biases (biases are shared across batch examples, so sum the errors)
-        double bias_update = 0.0;
-        for (size_t b = 0; b < nn->output_layer->columns; b++) {
-            bias_update += MAT(nn->output_errors, o, b);
-        }
-        nn->output_biases->buffer[o] -= learning_rate * bias_update / nn->output_layer->columns; // average over batch
-    }
-
-
-    // Update input to hidden weights and hidden biases
-    for (size_t h = 0; h < nn->hidden_layer->rows; h++) {
-        for (size_t i = 0; i < nn->input_size; i++) {
-            double weight_update = 0.0;
-            for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-                weight_update += MAT(nn->hidden_errors, h, b) * MAT(inputs, i, b);
-            }
-            MAT(nn->input_hidden_weights, h, i) -= learning_rate * weight_update / nn->hidden_layer->columns; // average over batch
-        }
-        // Update hidden biases
-        double bias_update = 0.0;
-        for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
-            bias_update += MAT(nn->hidden_errors, h, b);
-        }
-        nn->hidden_biases->buffer[h] -= learning_rate * bias_update / nn->hidden_layer->columns; // average over batch
-    }
-}
-
 /* param inputs  is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns) */
 /* param targets is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_output_nodes columns) */
-void back_propagation_bare(NeuralNetwork* nn, double* inputs, double* targets, size_t batch_size, double learning_rate) {
+void back_propagation(NeuralNetwork* nn, double* inputs, double* targets, size_t batch_size, double learning_rate) {
     if (batch_size != nn->output_layer->columns) {
         printf(
                 "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",

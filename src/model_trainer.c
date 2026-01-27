@@ -117,7 +117,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                     }
                 }
             }
-            back_propagation_bare(trainer->nn, input + actually_trained, output + actually_trained, not_trained, trainer->learning_rate);
+            back_propagation(trainer->nn, input + actually_trained, output + actually_trained, not_trained, trainer->learning_rate);
         }
 
         // Now we take care of the rest (aka normal sized batches)
@@ -136,7 +136,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
                     }
                 }
             }
-            back_propagation_bare(trainer->nn, input, output, trainer->batch_size, trainer->learning_rate);
+            back_propagation(trainer->nn, input, output, trainer->batch_size, trainer->learning_rate);
             input += trainer->batch_size;
             output += trainer->batch_size;
         }
