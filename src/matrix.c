@@ -202,7 +202,16 @@ Matrix* new_matrix_from_file(FILE* file) {
 
     for (size_t r = 0; r < rows; r++) {
         for (size_t c = 0; c < columns; c++) {
-            fscanf(file, "%lf", &MAT(new_matrix, r, c));
+            fscanf_res = fscanf(file, "%lf", &MAT(new_matrix, r, c));
+            if (fscanf_res != 1) {
+                printf(
+                        "Expected Matrix of size (%zu, %zu) but element at (%zu, %zu) is missing in file\n",
+                        rows, columns,
+                        r, c 
+                );
+                free_matrix(new_matrix);
+                return NULL;
+            }
         }
     }
 

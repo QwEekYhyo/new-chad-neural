@@ -172,6 +172,23 @@ int main(void) {
         remove("test_matrix_neg.ncn");
     }
 
+    printf("\nTest 12: Load matrix from file with incomplete data...\n");
+    FILE* incomplete_file = fopen("test_matrix_incomplete.ncn", "w");
+    if (incomplete_file) {
+        fprintf(incomplete_file, "M 2 2\n1.0 2.0\n69.0\n"); // Only 3 values instead of 4
+        fclose(incomplete_file);
+        incomplete_file = fopen("test_matrix_incomplete.ncn", "r");
+        Matrix* m_incomplete = new_matrix_from_file(incomplete_file);
+        if (m_incomplete == NULL) {
+            printf("  PASS: Loading matrix with incomplete data returns NULL\n");
+        } else {
+            printf("  WARNING: Loading matrix with incomplete data succeeded (may have undefined values)\n");
+            free_matrix(m_incomplete);
+        }
+        fclose(incomplete_file);
+        remove("test_matrix_incomplete.ncn");
+    }
+
     // Summary
     printf("\n========================================\n");
     if (error_count == 0) {
