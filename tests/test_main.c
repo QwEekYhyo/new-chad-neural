@@ -74,7 +74,7 @@ int main(void) {
     MAT(input, 0, 1) = 0.59;
     MAT(input, 0, 2) = 0.73;
     set_batch_size(nn, 3);
-    forward_pass(nn, input);
+    forward_pass(nn, inputs_from_array(input->buffer, 3));
     for (size_t i = 0; i < 3; i++) {
         printf("x = %f, f(x) = %f, model predicted : %f\n",
                 MAT(input, 0, i),

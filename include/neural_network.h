@@ -43,20 +43,41 @@ typedef struct {
     Matrix* hidden_errors;
 } NeuralNetwork;
 
+typedef struct {
+    unsigned is_matrix_object : 1;
+    union {
+        Matrix* m_inputs;
+        struct {
+            double* inputs;
+            size_t batch_size;
+        };
+    };
+} InputData;
+
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);
 void free_neural_network(NeuralNetwork* nn);
 
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
-void forward_pass(NeuralNetwork* nn, Matrix* inputs);
+void forward_pass(NeuralNetwork* nn, InputData inputs);
 void back_propagation(NeuralNetwork* nn, double* inputs, double* expected_outputs, size_t batch_size, double learning_rate);
-
-/* You still need to set batch_size correctly obviously
- * param batch_size is a redundancy
- */
-void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size);
 
 int save_neural_network(NeuralNetwork* nn, const char* filename);
 NeuralNetwork* new_neural_network_from_file(const char* filename);
+
+static inline InputData inputs_from_matrix(Matrix* m) {
+    return (InputData) {
+        .is_matrix_object = 1,
+        .m_inputs = m
+    };
+}
+
+static inline InputData inputs_from_array(double* inputs, size_t batch_size) {
+    return (InputData) {
+        .is_matrix_object = 0,
+        .inputs = inputs,
+        .batch_size = batch_size
+    };
+}
 
 #endif // NCN_NEURAL_NETWORK_H

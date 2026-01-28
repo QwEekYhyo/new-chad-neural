@@ -105,7 +105,10 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
             set_batch_size(trainer->nn, not_trained);
 
             // Train the small batch
-            forward_pass_bare(trainer->nn, input + actually_trained, not_trained);
+            forward_pass(
+                    trainer->nn,
+                    inputs_from_array(input + actually_trained, not_trained)
+            );
             if (with_history) {
                 // Add loss
                 for (size_t o = 0; o < not_trained; o++) {
@@ -124,7 +127,10 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         set_batch_size(trainer->nn, trainer->batch_size);
         for (size_t iteration = 0; iteration < iterations; iteration++) {
             // Train batch
-            forward_pass_bare(trainer->nn, input, trainer->batch_size);
+            forward_pass(
+                    trainer->nn,
+                    inputs_from_array(input, trainer->batch_size)
+            );
             if (with_history) {
                 // Add loss
                 for (size_t o = 0; o < trainer->batch_size; o++) {

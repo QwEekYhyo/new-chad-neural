@@ -172,7 +172,7 @@ int main(void) {
 
     set_batch_size(nn, 1);
 
-    forward_pass_bare(nn, images, 1);
+    forward_pass(nn, inputs_from_array(images, 1));
     printf("Label:\n");
     for (int i = 0; i < 10; i++) {
         printf("%.1lf ", labels[0 * 10 + i]);
@@ -180,7 +180,7 @@ int main(void) {
     printf("\nOutput:\n");
     print_matrix(nn->output_layer);
 
-    forward_pass_bare(nn, images + rows * cols * 3, 1);
+    forward_pass(nn, inputs_from_array(images + rows * cols * 3, 1));
     printf("\nLabel:\n");
     for (int i = 0; i < 10; i++) {
         printf("%.1lf ", labels[3 * 10 + i]);

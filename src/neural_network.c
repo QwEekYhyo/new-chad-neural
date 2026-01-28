@@ -75,31 +75,51 @@ void set_batch_size(NeuralNetwork* nn, size_t batch_size) {
         set_columns(nn->hidden_errors, batch_size);
 }
 
-void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
-    if (inputs->rows != nn->input_size) {
+/*
+ * param inputs is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns)
+ * OR a Matrix object
+ */
+void forward_pass(NeuralNetwork* nn, InputData inputs) {
+    size_t batch_size = inputs.is_matrix_object
+        ? inputs.m_inputs->columns
+        : inputs.batch_size;
+
+    // Annoying inputs check, maybe but this in a separate function?
+    if (inputs.is_matrix_object && inputs.m_inputs->rows != nn->input_size) {
         printf(
                 "Size of given inputs (%zu) doesn't match number of input nodes in neural network (%zu)\n",
-                inputs->rows,
+                inputs.m_inputs->rows,
                 nn->input_size
         );
         return;
     }
 
-    if (inputs->columns != nn->output_layer->columns) {
+    if (batch_size != nn->hidden_layer->columns ||
+        batch_size != nn->output_layer->columns)
+    {
         printf(
                 "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
-                inputs->columns,
+                inputs.m_inputs->columns,
                 nn->output_layer->columns
         );
         return;
     }
+
+    if (!inputs.is_matrix_object && !inputs.inputs) {
+        printf("No input(s) provided to forward pass\n");
+        return;
+    }
+
+    double* inputs_buffer = inputs.is_matrix_object
+        ? inputs.m_inputs->buffer
+        : inputs.inputs;
 
     // Input to hidden layer
     for (size_t b = 0; b < nn->hidden_layer->columns; b++) {
         for (size_t i = 0; i < nn->hidden_layer->rows; i++) {
             MAT(nn->hidden_layer, i, b) = nn->hidden_biases->buffer[i];
             for (size_t j = 0; j < nn->input_size; j++) {
-                MAT(nn->hidden_layer, i, b) += MAT(inputs, j, b) * MAT(nn->input_hidden_weights, i, j);
+                MAT(nn->hidden_layer, i, b) += inputs_buffer[b * nn->input_size + j] * MAT(nn->input_hidden_weights, i, j);
             }
             // Apply activation function
             switch (nn->hidden_layer_af) {
@@ -117,67 +137,6 @@ void forward_pass(NeuralNetwork* nn, Matrix* inputs) {
 
     // Hidden to output layer
     for (size_t b = 0; b < nn->output_layer->columns; b++) {
-        for (size_t i = 0; i < nn->output_layer->rows; i++) {
-            MAT(nn->output_layer, i, b) = nn->output_biases->buffer[i];
-            for (size_t j = 0; j < nn->hidden_layer->rows; j++) {
-                MAT(nn->output_layer, i, b) += MAT(nn->hidden_layer, j, b) * MAT(nn->hidden_output_weights, i, j);
-            }
-            // Apply activation function
-            switch (nn->output_layer_af) {
-                case IDENTITY:
-                    break;
-                case SIGMOID:
-                    MAT(nn->output_layer, i, b) = sigmoid(MAT(nn->output_layer, i, b));
-                    break;
-                case SOFTMAX:
-                    // Special case, it is done afterwards
-                    break;
-            }
-        }
-    }
-    if (nn->output_layer_af == SOFTMAX)
-        softmax(nn->output_layer);
-}
-
-/* param inputs is a flat 2D array that HAS TO be sized this way : (batch_size rows, num_input_nodes columns) */
-void forward_pass_bare(NeuralNetwork* nn, double* inputs, size_t batch_size) {
-    if (!inputs) {
-        printf("No input(s) provided to forward pass\n");
-        return;
-    }
-
-    if (batch_size != nn->output_layer->columns) {
-        printf(
-                "Batch size is not set correctly, got a batch of size %zu while NN is set to %zu\n",
-                batch_size,
-                nn->output_layer->columns
-        );
-        return;
-    }
-
-    // Input to hidden layer
-    for (size_t b = 0; b < batch_size; b++) {
-        for (size_t i = 0; i < nn->hidden_layer->rows; i++) {
-            MAT(nn->hidden_layer, i, b) = nn->hidden_biases->buffer[i];
-            for (size_t j = 0; j < nn->input_size; j++) {
-                MAT(nn->hidden_layer, i, b) += inputs[b * nn->input_size + j] * MAT(nn->input_hidden_weights, i, j);
-            }
-            // Apply activation function
-            switch (nn->hidden_layer_af) {
-                case IDENTITY:
-                    break;
-                case SIGMOID:
-                    MAT(nn->hidden_layer, i, b) = sigmoid(MAT(nn->hidden_layer, i, b));
-                    break;
-                case SOFTMAX:
-                    printf("Softmax for hidden layer isn't done\n");
-                    break;
-            }
-        }
-    }
-
-    // Hidden to output layer
-    for (size_t b = 0; b < batch_size; b++) {
         for (size_t i = 0; i < nn->output_layer->rows; i++) {
             MAT(nn->output_layer, i, b) = nn->output_biases->buffer[i];
             for (size_t j = 0; j < nn->hidden_layer->rows; j++) {

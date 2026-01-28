@@ -37,7 +37,7 @@ int main(void) {
         for (size_t b = 0; b < BATCH_SIZE; b++) {
             MAT(input, 0, b) = (i * BATCH_SIZE + b) / (100.0 * BATCH_SIZE);
         }
-        forward_pass(nn, input);
+        forward_pass(nn, inputs_from_matrix(input));
         for (size_t b = 0; b < BATCH_SIZE; b++) {
             fprintf(gnuplot, "%f %f\n",
                     MAT(input, 0, b) * 20,
