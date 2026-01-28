@@ -25,24 +25,33 @@
 
 Matrix* new_uninitialized_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = _allocate_matrix(rows, columns);
-    new_matrix->buffer = malloc(rows * columns * sizeof(double));
+
+    if (new_matrix) {
+        new_matrix->buffer = malloc(rows * columns * sizeof(double));
+    }
 
     return new_matrix;
 }
 
 Matrix* new_zero_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = _allocate_matrix(rows, columns);
-    new_matrix->buffer = calloc(rows * columns, sizeof(double));
+
+    if (new_matrix) {
+        new_matrix->buffer = calloc(rows * columns, sizeof(double));
+    }
 
     return new_matrix;
 }
 
 Matrix* new_random_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = _allocate_matrix(rows, columns);
-    new_matrix->buffer = malloc(rows * columns * sizeof(double));
 
-    for (size_t i = 0; i < rows * columns; i++) {
-        new_matrix->buffer[i] = rand_double_range(0, 1);
+    if (new_matrix) {
+        new_matrix->buffer = malloc(rows * columns * sizeof(double));
+
+        for (size_t i = 0; i < rows * columns; i++) {
+            new_matrix->buffer[i] = rand_double_range(0, 1);
+        }
     }
 
     return new_matrix;
@@ -51,30 +60,41 @@ Matrix* new_random_matrix(size_t rows, size_t columns) {
 // Normal Xavier initialization
 Matrix* new_glorot_normal_matrix(size_t rows, size_t columns) {
     Matrix* new_matrix = _allocate_matrix(rows, columns);
-    new_matrix->buffer = malloc(rows * columns * sizeof(double));
 
-    double stddev = sqrt(2.0 / (columns + rows));
-    double a;
-    double b;
+    if (new_matrix) {
+        new_matrix->buffer = malloc(rows * columns * sizeof(double));
 
-    size_t n = rows * columns;
-    size_t i = 0;
+        double stddev = sqrt(2.0 / (columns + rows));
+        double a;
+        double b;
 
-    for (; i + 1 < n; i += 2) {
-        rand_normal(0.0, stddev, &a, &b);
-        new_matrix->buffer[i] = a;
-        new_matrix->buffer[i + 1] = b;
-    }
+        size_t n = rows * columns;
+        size_t i = 0;
 
-    if (i < n) {
-        rand_normal(0.0, stddev, &a, &b);
-        new_matrix->buffer[i] = a;
+        for (; i + 1 < n; i += 2) {
+            rand_normal(0.0, stddev, &a, &b);
+            new_matrix->buffer[i] = a;
+            new_matrix->buffer[i + 1] = b;
+        }
+
+        if (i < n) {
+            rand_normal(0.0, stddev, &a, &b);
+            new_matrix->buffer[i] = a;
+        }
     }
 
     return new_matrix;
 }
 
 Matrix* _allocate_matrix(size_t rows, size_t columns) {
+    if (rows == 0 || columns == 0) {
+        printf("Cannot allocate Matrix with size 0\n");
+        return NULL;
+    }
+    if (rows * columns >= 100000) {
+        printf("[WARNING] Trying to allocate a big Matrix (%zu, %zu)\n", rows, columns);
+    }
+
     Matrix* new_matrix = malloc(sizeof(Matrix));
     new_matrix->rows = rows;
     new_matrix->columns = columns;
@@ -99,6 +119,14 @@ void print_matrix(Matrix* matrix) {
 }
 
 int set_columns(Matrix* matrix, size_t columns) {
+    if (columns == 0) {
+        printf("Cannot set Matrix columns to 0\n");
+        return -2;
+    }
+    if (columns >= 10000) {
+        printf("[WARNING] Trying to reallocate a big Matrix (%zu, %zu)\n", matrix->rows, columns);
+    }
+
     matrix->columns = columns;
 
     if (columns > matrix->_columns) {
@@ -116,6 +144,11 @@ int set_columns(Matrix* matrix, size_t columns) {
 }
 
 int save_matrix(Matrix* matrix, FILE* file) {
+    if (!matrix) {
+        printf("No Matrix provided for save\n");
+        return -1;
+    }
+
     if (!file) {
         printf("No opened file provided to save Matrix\n");
         return -1;
@@ -135,6 +168,11 @@ int save_matrix(Matrix* matrix, FILE* file) {
 }
 
 Matrix* new_matrix_from_file(FILE* file) {
+    if (!file) {
+        printf("No opened file provided to load Matrix from\n");
+        return NULL;
+    }
+
     char type;
     fscanf(file, "%c", &type);
     if (type != 'M') {
