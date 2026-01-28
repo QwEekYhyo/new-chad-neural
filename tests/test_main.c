@@ -34,6 +34,9 @@
 #define OUTPUT_SIZE 1
 #define DATASET_SIZE 100
 
+#define TEST_EPSILON 0.0001
+#define TEST_LOSS_THRESHOLD 0.01
+
 double f(double x) {
     return 0.4 * x + 0.2;
 }
@@ -67,25 +70,39 @@ int main(void) {
 
     printf("Start training...\n");
     double* loss_history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);
+    if (loss_history[trainer.epochs - 1] > TEST_LOSS_THRESHOLD) {
+        printf("Loss is bad, model did not learn\n");
+        return 1;
+    }
 
-    printf("testing training results:\n");
+    printf("Testing training results:\n");
     Matrix* input = new_uninitialized_matrix(1, 3);
     MAT(input, 0, 0) = 0.102;
     MAT(input, 0, 1) = 0.59;
     MAT(input, 0, 2) = 0.73;
     set_batch_size(nn, 3);
-    forward_pass(nn, inputs_from_array(input->buffer, 3));
+    forward_pass(nn, inputs_from_matrix(input));
+
+    unsigned wrong_result = 0;
     for (size_t i = 0; i < 3; i++) {
+        double y = f(MAT(input, 0, i));
+        double y_predicted = MAT(nn->output_layer, 0, i);
+
         printf("x = %f, f(x) = %f, model predicted : %f\n",
                 MAT(input, 0, i),
-                f(MAT(input, 0, i)),
-                MAT(nn->output_layer, 0, i)
+                y,
+                y_predicted
         );
+
+        if (fabs(y - y_predicted) >= TEST_EPSILON) {
+            printf("Wrong prediction detected!\n");
+            wrong_result++;
+        }
     }
 
     free(loss_history);
     free_matrix(input);
     free_neural_network(nn);
 
-    return 0;
+    return wrong_result;
 }
