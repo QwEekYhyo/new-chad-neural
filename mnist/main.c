@@ -163,9 +163,9 @@ int main(void) {
 
 
     trainer.nn = nn;
-    trainer.learning_rate = 0.01;
+    trainer.learning_rate = 0.05;
     trainer.batch_size = 32;
-    trainer.epochs = 320;
+    trainer.epochs = 750;
     set_loss_function(&trainer, CCE);
 
     double* history = train_with_history(&trainer, images, (double*) labels, 1000);
