@@ -23,8 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Maybe check that size is not zero ?
 Vector* new_uninitialized_vector(size_t size) {
+    if (size == 0) {
+        printf("Cannot allocate Vector of size 0\n");
+        return NULL;
+    }
+
     Vector* new_vector = malloc(sizeof(Vector));
     new_vector->size = size;
     new_vector->buffer = malloc(size * sizeof(double));
@@ -33,6 +37,11 @@ Vector* new_uninitialized_vector(size_t size) {
 }
 
 Vector* new_zero_vector(size_t size) {
+    if (size == 0) {
+        printf("Cannot allocate Vector of size 0\n");
+        return NULL;
+    }
+
     Vector* new_vector = malloc(sizeof(Vector));
     new_vector->size = size;
     new_vector->buffer = calloc(size, sizeof(double));
@@ -41,6 +50,11 @@ Vector* new_zero_vector(size_t size) {
 }
 
 Vector* new_random_vector(size_t size) {
+    if (size == 0) {
+        printf("Cannot allocate Vector of size 0\n");
+        return NULL;
+    }
+
     Vector* new_vector = malloc(sizeof(Vector));
     new_vector->size = size;
 
@@ -66,6 +80,11 @@ void print_vector(Vector* vector) {
 }
 
 int save_vector(Vector* vector, FILE* file) {
+    if (!vector) {
+        printf("No Vector provided for save\n");
+        return -1;
+    }
+
     if (!file) {
         printf("No opened file provided to save Vector\n");
         return -1;
@@ -83,19 +102,47 @@ int save_vector(Vector* vector, FILE* file) {
 }
 
 Vector* new_vector_from_file(FILE* file) {
+    if (!file) {
+        printf("No opened file provided to load Vector from\n");
+        return NULL;
+    }
+
     char type;
-    fscanf(file, "%c", &type);
+    int fscanf_res = fscanf(file, "%c", &type);
+    if (fscanf_res != 1) {
+        printf("Tried to load Vector from empty file\n");
+        return NULL;
+    }
     if (type != 'V') {
         printf("Type \"%c\" is not Vector type\n", type);
         return NULL;
     }
 
-    size_t size;
-    fscanf(file, "%zu", &size);
+    long long temp_signed_size;
+    fscanf(file, "%lld", &temp_signed_size);
+#ifdef DEBUG
+    printf("Read size: %lld\n", temp_signed_size);
+#endif
+    if (temp_signed_size < 0) {
+        printf("File contains a Vector with negative size\n");
+        return NULL;
+    }
+
+    size_t size = (size_t) temp_signed_size;
 
     Vector* new_vector = new_uninitialized_vector(size);
+    if (!new_vector) {
+        printf("Failed to allocate Vector of size %zu\n", size);
+        return NULL;
+    }
+
     for (size_t i = 0; i < size; i++) {
-        fscanf(file, "%lf", &new_vector->buffer[i]);
+        fscanf_res = fscanf(file, "%lf", &new_vector->buffer[i]);
+        if (fscanf_res != 1) {
+            printf("Expected Vector of size %zu, but only found %zu elements\n", size, i);
+            free_vector(new_vector);
+            return NULL;
+        }
     }
 
     char delimiter[6];
