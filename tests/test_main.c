@@ -20,6 +20,7 @@
 #include <neural_network.h>
 #include <utils.h>
 #include <model_trainer.h>
+#include <common_defs.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +38,8 @@ double f(double x) {
     return 0.4 * x + 0.2;
 }
 
+ModelTrainer trainer;
+
 int main(void) {
     // Better randomization
 #if defined(_POSIX_VERSION)
@@ -48,6 +51,7 @@ int main(void) {
 #endif
 
     // Create dataset
+    printf("Creating dataset...\n");
     double data[DATASET_SIZE][INPUT_SIZE];
     double output_data[DATASET_SIZE][OUTPUT_SIZE];
     for (size_t i = 0; i < DATASET_SIZE; i++) {
@@ -55,33 +59,29 @@ int main(void) {
         output_data[i][0] = f(data[i][0]);
     }
 
+    printf("Init Neural Network...\n");
     NeuralNetwork* nn = new_neural_network(INPUT_SIZE, 3, OUTPUT_SIZE);
-    ModelTrainer trainer;
     trainer.nn = nn;
     trainer.batch_size = 10;
     trainer.epochs = 2000;
 
+    printf("Start training...\n");
     double* loss_history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);
 
     printf("testing training results:\n");
     Matrix* input = new_uninitialized_matrix(1, 3);
-    input->buffer[0][0] = 0.102;
-    input->buffer[0][1] = 0.59;
-    input->buffer[0][2] = 0.73;
+    MAT(input, 0, 0) = 0.102;
+    MAT(input, 0, 1) = 0.59;
+    MAT(input, 0, 2) = 0.73;
     set_batch_size(nn, 3);
-    forward_pass(nn, input);
+    forward_pass(nn, inputs_from_array(input->buffer, 3));
     for (size_t i = 0; i < 3; i++) {
         printf("x = %f, f(x) = %f, model predicted : %f\n",
-                input->buffer[0][i],
-                f(input->buffer[0][i]),
-                nn->output_layer->buffer[0][i]
+                MAT(input, 0, i),
+                f(MAT(input, 0, i)),
+                MAT(nn->output_layer, 0, i)
         );
     }
-
-    printf("loss history:\n");
-    for (size_t i = 0; i < trainer.epochs; i++)
-        printf("%f, ", loss_history[i]);
-    printf("\n");
 
     free(loss_history);
     free_matrix(input);

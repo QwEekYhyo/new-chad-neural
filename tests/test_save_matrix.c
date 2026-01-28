@@ -29,8 +29,8 @@ int main(void) {
 
     for (size_t i = 0; i < m->rows; i++) {
         for (size_t j = 0; j < m->columns; j++) {
-            m->buffer[i][j] = (i * 10) + j / 15.0;
-            m->buffer[i][j] *= m->buffer[i][j];
+            MAT(m, i, j) = (i * 10) + j / 15.0;
+            MAT(m, i, j) *= MAT(m, i, j);
         }
     }
 
@@ -82,9 +82,9 @@ int main(void) {
     for (size_t i = 0; i < m->rows; i++) {
         for (size_t j = 0; j < m->columns; j++) {
             fscanf(file, "%lf", &current);
-            if (!are_double_equals(current, m->buffer[i][j])) {
+            if (!are_double_equals(current, MAT(m, i, j))) {
                 printf("Saved value differs from real value, expected: %.15lf, got: %.15lf\n",
-                        m->buffer[i][j],
+                        MAT(m, i, j),
                         current
                 );
                 return 1;

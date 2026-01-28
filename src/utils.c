@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
 #include <utils.h>
 
 #include <stdlib.h>
@@ -29,21 +30,25 @@ double rand_double_range(int min, int max) {
     return min + scale * (max - min);
 }
 
-double identity(double x) {
-    return x;
+// Generate uniformly distributed random numbers (between 0 and 1)
+double rand_uniform(void) {
+    return (double) rand() / RAND_MAX;
 }
 
-double identity_derivative(double x) {
-    return 1;
-}
+// Generate normally distributed numbers using Box-Muller transform
+// This generates two numbers to save 1 log and 1 square root computation every 2 generated numbers
+//   mean   - mean of distribution
+//   stddev - standard deviation
+//   z0 and z1 are where the results are put
+void rand_normal(double mean, double stddev, double* z0, double* z1) {
+    const double TWO_PI = 2.0 * M_PI;
 
-double sigmoid(double x) {
-    return 1.0 / (1.0 + exp(-x));
-}
-
-// This is not actually the derivative of the sigmoid
-// But it is going to be called on data that has already passed through the sigmoid
-// Basically here we assume that x = sigmoid(y)
-double sigmoid_derivative(double x) {
-    return x * (1 - x);
+    double u1 = rand_uniform();
+    double u2 = rand_uniform();
+    
+    double mag = stddev * sqrt(-2.0 * log(u1));
+    if (z0)
+        *z0 = mag * cos(TWO_PI * u2) + mean;
+    if (z1)
+        *z1 = mag * sin(TWO_PI * u2) + mean;
 }

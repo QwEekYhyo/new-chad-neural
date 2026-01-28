@@ -35,20 +35,49 @@ typedef struct {
     Vector* hidden_biases;
     Vector* output_biases;
 
-    activation_function activation_function;
-    activation_function activation_function_derivative;
+    enum ActivationFunction hidden_layer_af; // Activation function of hidden layer
+    enum ActivationFunction output_layer_af; // Activation function of output layer
+
+    loss_function loss_function_derivative;
+    Matrix* output_errors;
+    Matrix* hidden_errors;
 } NeuralNetwork;
+
+typedef struct {
+    unsigned is_matrix_object : 1;
+    union {
+        Matrix* m_inputs;
+        struct {
+            double* inputs;
+            size_t batch_size;
+        };
+    };
+} InputData;
 
 NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t num_outputs);
 void free_neural_network(NeuralNetwork* nn);
 
-void set_activation_functions(NeuralNetwork* nn, activation_function af, activation_function daf);
 void set_batch_size(NeuralNetwork* nn, size_t batch_size);
 
-void forward_pass(NeuralNetwork* nn, Matrix* inputs);
-void back_propagation(NeuralNetwork* nn, Matrix* inputs, Matrix* expected_outputs, double learning_rate);
+void forward_pass(NeuralNetwork* nn, InputData inputs);
+void back_propagation(NeuralNetwork* nn, double* inputs, double* expected_outputs, size_t batch_size, double learning_rate);
 
 int save_neural_network(NeuralNetwork* nn, const char* filename);
 NeuralNetwork* new_neural_network_from_file(const char* filename);
+
+static inline InputData inputs_from_matrix(Matrix* m) {
+    return (InputData) {
+        .is_matrix_object = 1,
+        .m_inputs = m
+    };
+}
+
+static inline InputData inputs_from_array(double* inputs, size_t batch_size) {
+    return (InputData) {
+        .is_matrix_object = 0,
+        .inputs = inputs,
+        .batch_size = batch_size
+    };
+}
 
 #endif // NCN_NEURAL_NETWORK_H

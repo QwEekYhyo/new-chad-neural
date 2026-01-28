@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <model_trainer.h>
+
+#include <functions.h>
 #include <matrix.h>
 #include <neural_network.h>
-#include <model_trainer.h>
 #include <utils.h>
 
 #include <stdio.h>
@@ -30,7 +32,31 @@
  * iteration  = number of passes needed to perform 1 epoch
  */
 
-// train_data and train_output should oviously be the same size (dataset_size)
+int set_loss_function(ModelTrainer* trainer, enum LossFunction loss) {
+    if (!trainer->nn) {
+        printf("Could not set loss function: no Neural Network associated with Model Trainer\n");
+        return -1;
+    }
+
+    switch (loss) {
+        case MSE:
+            trainer->loss_function = mean_squared_error;
+            trainer->nn->loss_function_derivative = mean_squared_error_derivative;
+            break;
+        case BCE:
+            trainer->loss_function = binary_cross_entropy;
+            trainer->nn->loss_function_derivative = binary_cross_entropy_derivative;
+            break;
+        case CCE:
+            trainer->loss_function = categorical_cross_entropy;
+            trainer->nn->loss_function_derivative = categorical_cross_entropy_derivative;
+            break;
+    }
+
+    return 0;
+}
+
+// train_data and train_output should obviously be the same size (dataset_size)
 void train(ModelTrainer* trainer, double* train_data, double* train_output, size_t dataset_size) {
     _train(trainer, train_data, train_output, dataset_size, 0, NULL);
 }
@@ -47,107 +73,86 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
         return;
     }
 
+    /* This is utter garbage as they might be non-zero when uninitialized */
     if (!trainer->learning_rate)
         trainer->learning_rate = 0.01; // default learning_rate
     if (!trainer->epochs)
         trainer->epochs = 100; // default epochs
     if (!trainer->batch_size)
         trainer->batch_size = 32; // default batch_size
+    if (with_history && !trainer->loss_function)
+        trainer->loss_function = mean_squared_error; // default loss_function
 
-    size_t input_size = trainer->nn->input_size;
     size_t output_size = trainer->nn->output_layer->rows;
-    size_t max_size = max(input_size, output_size);
 
     size_t iterations = dataset_size / trainer->batch_size;
     size_t actually_trained = iterations * trainer->batch_size;
     size_t not_trained = dataset_size - actually_trained;
 
-    Matrix* input;
-    Matrix* output;
     for (size_t epoch = 0; epoch < trainer->epochs; epoch++) {
-        if (epoch % 100 == 0)
-            printf("training epoch = %zu\n", epoch);
+        if (epoch % 100 == 0) {
+            printf("training epoch = %zu", epoch);
+            if (!with_history)
+                putchar('\n');
+        }
 
         double current_loss = 0;
+        double* input = train_data;
+        double* output = train_output;
 
         if (not_trained != 0) {
             // First train separately the small portion of the dataset left out by the iteration division
             set_batch_size(trainer->nn, not_trained);
-            input  = new_uninitialized_matrix(input_size , not_trained);
-            output = new_uninitialized_matrix(output_size , not_trained);
-
-            // Fill input & output matrices
-            // I feel like filling both matrices at the same time using if statements to check boundaries
-            // is more efficient than looping twice ?
-            for (size_t data_index = 0; data_index < not_trained; data_index++) {
-                for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
-                    if (vector_index < input_size)
-                        input->buffer[vector_index][data_index] =
-                            train_data[(actually_trained + data_index) * input_size + vector_index];
-                    if (vector_index < output_size)
-                        output->buffer[vector_index][data_index] =
-                            train_output[(actually_trained + data_index) * output_size + vector_index];
-                }
-            }
 
             // Train the small batch
-            forward_pass(trainer->nn, input);
+            forward_pass(
+                    trainer->nn,
+                    inputs_from_array(input + actually_trained, not_trained)
+            );
             if (with_history) {
                 // Add loss
                 for (size_t o = 0; o < not_trained; o++) {
                     for (size_t i = 0; i < output_size; i++) {
-                        double difference =
-                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
-                        current_loss += difference * difference;
+                        current_loss += trainer->loss_function(
+                                output[o * output_size + i],
+                                MAT(trainer->nn->output_layer, i, o)
+                        );
                     }
                 }
             }
-            back_propagation(trainer->nn, input, output, trainer->learning_rate);
-
-            free_matrix(input);
-            free_matrix(output);
+            back_propagation(trainer->nn, input + actually_trained, output + actually_trained, not_trained, trainer->learning_rate);
         }
 
         // Now we take care of the rest (aka normal sized batches)
         set_batch_size(trainer->nn, trainer->batch_size);
-        input  = new_uninitialized_matrix(input_size , trainer->batch_size);
-        output = new_uninitialized_matrix(output_size , trainer->batch_size);
         for (size_t iteration = 0; iteration < iterations; iteration++) {
-            // Fill input & output matrices
-            // I feel like filling both matrices at the same time using if statements to check boundaries
-            // is more efficient than looping twice ?
-            for (size_t data_index = 0; data_index < trainer->batch_size; data_index++) {
-                for (size_t vector_index = 0; vector_index < max_size; vector_index++) {
-                    size_t dataset_index = iteration * trainer->batch_size + data_index;
-
-                    if (vector_index < input_size)
-                        input->buffer[vector_index][data_index] =
-                            train_data[dataset_index * input_size + vector_index];
-                    if (vector_index < output_size)
-                        output->buffer[vector_index][data_index] =
-                            train_output[dataset_index * output_size + vector_index];
-                }
-            }
-
             // Train batch
-            forward_pass(trainer->nn, input);
+            forward_pass(
+                    trainer->nn,
+                    inputs_from_array(input, trainer->batch_size)
+            );
             if (with_history) {
                 // Add loss
                 for (size_t o = 0; o < trainer->batch_size; o++) {
                     for (size_t i = 0; i < output_size; i++) {
-                        double difference =
-                            trainer->nn->output_layer->buffer[i][o] - output->buffer[i][o];
-                        current_loss += difference * difference;
+                        current_loss += trainer->loss_function(
+                                output[o * output_size + i],
+                                MAT(trainer->nn->output_layer, i, o)
+                        );
                     }
                 }
             }
-            back_propagation(trainer->nn, input, output, trainer->learning_rate);
+            back_propagation(trainer->nn, input, output, trainer->batch_size, trainer->learning_rate);
+            input += trainer->batch_size;
+            output += trainer->batch_size;
         }
 
-        if (with_history)
-            (*loss_history)[epoch] = current_loss / (dataset_size * output_size);
+        if (with_history) {
+            double average_loss = current_loss / (dataset_size * output_size);
+            (*loss_history)[epoch] = average_loss;
 
-        free_matrix(input);
-        free_matrix(output);
+            if (epoch % 100 == 0)
+                printf(" - loss = %.15f\n", average_loss);
+        }
     }
 }

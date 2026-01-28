@@ -15,22 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef NCN_COMMON_DEFS_H
-#define NCN_COMMON_DEFS_H
+#ifndef NCN_FUNCTIONS_H
+#define NCN_FUNCTIONS_H
 
-enum ActivationFunction {
-    IDENTITY,
-    SIGMOID,
-    SOFTMAX,
-};
+#include <stddef.h>
+#include <stdbool.h>
+#include <matrix.h>
 
-enum LossFunction {
-    MSE, // Mean Squared Error
-    BCE, // Binary Cross Entropy
-    CCE, // Categorical Cross Entropy
-};
+/***** Activation functions *****/
+double sigmoid(double x);
+double sigmoid_derivative(double x);
 
-typedef double (*activation_function)(double);
-typedef double (*loss_function)(double, double);
+void softmax(Matrix* output);
 
-#endif // NCN_COMMON_DEFS_H
+/***** Loss functions *****/
+double mean_squared_error(double target, double output);
+double mean_squared_error_derivative(double target, double output);
+
+double binary_cross_entropy(double target, double output);
+double binary_cross_entropy_derivative(double target, double output);
+
+double categorical_cross_entropy(double target, double output);
+double categorical_cross_entropy_derivative(double target, double output);
+
+#endif // NCN_FUNCTIONS_H

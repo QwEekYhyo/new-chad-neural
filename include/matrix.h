@@ -23,16 +23,23 @@
 
 typedef struct {
     size_t rows;
-    size_t columns;
-    double** buffer;
+    size_t columns; // number of used columns
+    size_t _columns; // number of actually allocated columns
+    double* buffer;
 } Matrix;
+
+#define MAT(m, row, col) ((m)->buffer[(row) * (m)->_columns + (col)])
 
 Matrix* new_uninitialized_matrix(size_t rows, size_t columns);
 Matrix* new_zero_matrix(size_t rows, size_t columns);
 Matrix* new_random_matrix(size_t rows, size_t columns);
+Matrix* new_glorot_normal_matrix(size_t rows, size_t columns);
+Matrix* _allocate_matrix(size_t rows, size_t columns);
 void free_matrix(Matrix* matrix);
 
 void print_matrix(Matrix* matrix);
+
+int set_columns(Matrix* matrix, size_t columns);
 
 int save_matrix(Matrix* matrix, FILE* file);
 Matrix* new_matrix_from_file(FILE* file);
