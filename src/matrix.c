@@ -174,16 +174,32 @@ Matrix* new_matrix_from_file(FILE* file) {
     }
 
     char type;
-    fscanf(file, "%c", &type);
+    int fscanf_res = fscanf(file, "%c", &type);
+    if (fscanf_res != 1) {
+        printf("Tried to load Matrix from empty file\n");
+        return NULL;
+    }
     if (type != 'M') {
         printf("Type \"%c\" is not Matrix type\n", type);
         return NULL;
     }
 
-    size_t rows, columns;
-    fscanf(file, "%zu %zu", &rows, &columns);
+    long long signed_rows, signed_columns;
+    fscanf(file, "%lld %lld", &signed_rows, &signed_columns);
+    if (signed_rows < 0 || signed_columns < 0) {
+        printf("File contains a Matrix with negative size\n");
+        return NULL;
+    }
+
+    size_t rows = (size_t) signed_rows;
+    size_t columns = (size_t) signed_columns;
 
     Matrix* new_matrix = new_uninitialized_matrix(rows, columns);
+    if (!new_matrix) {
+        printf("Failed to allocate Matrix (%zu, %zu)\n", rows, columns);
+        return NULL;
+    }
+
     for (size_t r = 0; r < rows; r++) {
         for (size_t c = 0; c < columns; c++) {
             fscanf(file, "%lf", &MAT(new_matrix, r, c));

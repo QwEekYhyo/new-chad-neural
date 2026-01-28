@@ -154,6 +154,24 @@ int main(void) {
         free_matrix(m_null_file);
     }
 
+    printf("\nTest 11: Load matrix from file with negative size...\n");
+    FILE* neg_file = fopen("test_matrix_neg.ncn", "w");
+    if (neg_file) {
+        fprintf(neg_file, "M 1 -5\n");
+        fclose(neg_file);
+        neg_file = fopen("test_matrix_neg.ncn", "r");
+        Matrix* m_neg_size = new_matrix_from_file(neg_file);
+        if (m_neg_size == NULL) {
+            printf("  PASS: Loading matrix with negative size returns NULL\n");
+        } else {
+            printf("  FAIL: Loading matrix with negative size should return NULL\n");
+            error_count++;
+            free_matrix(m_neg_size);
+        }
+        fclose(neg_file);
+        remove("test_matrix_neg.ncn");
+    }
+
     // Summary
     printf("\n========================================\n");
     if (error_count == 0) {
