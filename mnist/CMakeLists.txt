@@ -7,11 +7,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 link_directories(../build/src)
 
-# include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/../include)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}
+)
 
-# set(SOURCES ${CMAKE_SOURCE_DIR}/mnist/main.c)
-set(SOURCES ${CMAKE_SOURCE_DIR}/../mnist/main.c)
+set(SOURCES
+    ${CMAKE_SOURCE_DIR}/main.c
+    ${CMAKE_SOURCE_DIR}/mnist_utils.c
+)
 
 add_executable(mnist-test ${SOURCES})
 target_link_libraries(mnist-test new_chad_neural m)
