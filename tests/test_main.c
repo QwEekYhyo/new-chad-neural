@@ -67,6 +67,7 @@ int main(void) {
     trainer.nn = nn;
     trainer.batch_size = 10;
     trainer.epochs = 2000;
+    set_loss_function(&trainer, MSE);
 
     printf("Start training...\n");
     double* loss_history = train_with_history(&trainer, data[0], output_data[0], DATASET_SIZE);

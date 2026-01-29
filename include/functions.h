@@ -24,13 +24,18 @@
 
 /***** Activation functions *****/
 double sigmoid(double x);
+/*
+ * This is not actually the derivative of the sigmoid
+ * But it is going to be called on data that has already passed through the sigmoid
+ * Basically here we assume that x = sigmoid(y)
+ */
 double sigmoid_derivative(double x);
 
 void softmax(Matrix* output);
 
 /***** Loss functions *****/
-double mean_squared_error(double target, double output);
-double mean_squared_error_derivative(double target, double output);
+double squared_error(double target, double output);
+double squared_error_derivative(double target, double output);
 
 double binary_cross_entropy(double target, double output);
 double binary_cross_entropy_derivative(double target, double output);

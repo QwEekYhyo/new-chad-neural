@@ -50,12 +50,12 @@ void softmax(Matrix* output) {
     }
 }
 
-double mean_squared_error(double target, double output) {
+double squared_error(double target, double output) {
     return (target - output) * (target - output);
 }
 
-double mean_squared_error_derivative(double target, double output) {
-    return output - target;
+double squared_error_derivative(double target, double output) {
+    return 2 * (output - target);
 }
 
 double binary_cross_entropy(double target, double output) {

@@ -40,8 +40,8 @@ int set_loss_function(ModelTrainer* trainer, enum LossFunction loss) {
 
     switch (loss) {
         case MSE:
-            trainer->loss_function = mean_squared_error;
-            trainer->nn->loss_function_derivative = mean_squared_error_derivative;
+            trainer->loss_function = squared_error;
+            trainer->nn->loss_function_derivative = squared_error_derivative;
             break;
         case BCE:
             trainer->loss_function = binary_cross_entropy;
@@ -81,7 +81,7 @@ void _train(ModelTrainer* trainer, double* train_data, double* train_output, siz
     if (!trainer->batch_size)
         trainer->batch_size = 32; // default batch_size
     if (with_history && !trainer->loss_function)
-        trainer->loss_function = mean_squared_error; // default loss_function
+        trainer->loss_function = squared_error; // default loss_function
 
     size_t output_size = trainer->nn->output_layer->rows;
 

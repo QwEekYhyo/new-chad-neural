@@ -39,7 +39,7 @@ NeuralNetwork* new_neural_network(size_t num_inputs, size_t num_hidden, size_t n
     new_nn->hidden_layer_af = IDENTITY; // default activation functions
     new_nn->output_layer_af = IDENTITY;
 
-    new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
+    new_nn->loss_function_derivative = squared_error_derivative; // default loss_function_derivative
     new_nn->output_errors = NULL;
     new_nn->hidden_errors = NULL;
 
@@ -306,7 +306,7 @@ NeuralNetwork* new_neural_network_from_file(const char* filename) {
     new_nn->hidden_layer_af = IDENTITY; // default activation functions
     new_nn->output_layer_af = IDENTITY;
 
-    new_nn->loss_function_derivative = mean_squared_error_derivative; // default loss_function_derivative
+    new_nn->loss_function_derivative = squared_error_derivative; // default loss_function_derivative
     new_nn->output_errors = NULL;
     new_nn->hidden_errors = NULL;
 
