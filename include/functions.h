@@ -37,9 +37,11 @@ void softmax(Matrix* output);
 double squared_error(double target, double output);
 double squared_error_derivative(double target, double output);
 
+// I think that BCE formula currently assumes sigmoid as af
 double binary_cross_entropy(double target, double output);
 double binary_cross_entropy_derivative(double target, double output);
 
+// I think that CCE formula currently assumes softmax as af
 double categorical_cross_entropy(double target, double output);
 double categorical_cross_entropy_derivative(double target, double output);
 

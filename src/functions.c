@@ -18,6 +18,9 @@
 #include <functions.h>
 
 #include <math.h>
+#include <stdio.h>
+
+static const double MINIMUM_EPSILON = 1e-12;
 
 double sigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
@@ -59,6 +62,9 @@ double squared_error_derivative(double target, double output) {
 }
 
 double binary_cross_entropy(double target, double output) {
+    // The fmin fmax shit is to avoid log(0) and log(1)
+    // it doesn't seem to add performance overhead
+    output = fmin(fmax(output, MINIMUM_EPSILON), 1.0 - MINIMUM_EPSILON);
     return - (target * log(output) + (1 - target) * log(1 - output));
 }
 
@@ -68,8 +74,12 @@ double binary_cross_entropy_derivative(double target, double output) {
 
 /* I have actually no clue if the formulas below are correct xd */
 double categorical_cross_entropy(double target, double output) {
-    if (target == 1.0)
+    if (target == 1.0) {
+        // The fmin fmax shit is to avoid log(0)
+        // it doesn't seem to add performance overhead
+        output = fmin(fmax(output, MINIMUM_EPSILON), 1.0 - MINIMUM_EPSILON);
         return -log(output);
+    }
     return 0;
 }
 
